@@ -5,6 +5,7 @@ from graia.ariadne import Ariadne
 from graia.ariadne.event.lifecycle import ApplicationLaunched, ApplicationShutdowned, ApplicationLifecycleEvent
 from graia.ariadne.util.async_exec import io_bound
 from graia.saya import Channel
+from loguru import logger
 from waitress.server import MultiSocketServer
 
 from admin.error import TerminatedError
@@ -36,6 +37,7 @@ async def start_admin_server(app: Ariadne, loop: AbstractEventLoop):
 
     while True:
         session_id, request = await instance.admin.get_request()
+        logger.info(f"收到请求（{request.seq}）: {session_id}")
         try:
             if request.kwargs is None:
                 result = await request.callable(app, *request.args)
@@ -45,6 +47,7 @@ async def start_admin_server(app: Ariadne, loop: AbstractEventLoop):
         except TerminatedError:
             break
         except Exception as err:
+            logger.info(f"处理请求（{request.seq}）出错: {session_id}")
             instance.admin.set_result(session_id, None, err)
 
 

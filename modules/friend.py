@@ -1,8 +1,6 @@
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import FriendMessage
 from graia.ariadne.event.mirai import NewFriendRequestEvent
-from graia.ariadne.model import Profile
-from graia.ariadne.util.async_exec import io_bound
 
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema

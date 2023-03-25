@@ -6,6 +6,8 @@ from typing import Callable
 import requests
 from dataclasses import dataclass, asdict
 
+from loguru import logger
+
 
 @dataclass
 class UserInfo:
@@ -27,16 +29,17 @@ def call_until_success(fn: Callable[[], requests.Response]) -> bytes:
         try:
             resp = fn()
         except requests.RequestException as e:
-            print(f"请求错误： {e}")
-            print(f"等待 10 秒后重试 ...")
+            logger.info(f"请求错误： {e}")
+            logger.info(f"等待 10 秒后重试 ...")
             time.sleep(10)
             continue
         if resp.status_code % 100 == 5:
-            print(f"响应返回错误 {resp.status_code}： {resp.content.decode()}")
-            print(f"等待 10 秒后重试 ...")
+            logger.info(f"响应返回错误 {resp.status_code}： {resp.content.decode()}")
+            logger.info(f"等待 10 秒后重试 ...")
             time.sleep(10)
             continue
         if resp.status_code != http.HTTPStatus.OK:
+            logger.info(f"响应返回错误 {resp.status_code} ，终止： {resp.content.decode()}")
             raise RuntimeError(f"响应返回错误 {resp.status_code}： {resp.content.decode()}")
 
         return resp.content

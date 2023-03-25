@@ -18,7 +18,8 @@ cmd_create() {
   result_str="$(
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
-      -X PUT "$ARIADNE_ADMIN/api/friend/create?user_id=${user_id}"
+      -X PUT --data-binary "$data" \
+      "$ARIADNE_ADMIN/api/friend/create?user_id=${user_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
