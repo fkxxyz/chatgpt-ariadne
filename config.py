@@ -9,3 +9,5 @@ class Config:
     websocket: str
     chati: str
     masters: list[int]
+    listen: str
+    port: int

@@ -68,6 +68,21 @@ class ChatI:
         content_dict = json.loads(content)
         return ChatISessionInfo(**content_dict)
 
+    def inherit(self, id_: str, type_: str, params: dict, memo: str, history: str) -> ChatISessionInfo:
+        params_ = {'id': id_, 'type': type_}
+        data = {
+            'params': params,
+            'memo': memo,
+            'history': history
+        }
+        content = call_until_success(lambda: self.__session.put(f"{self.__url}/api/inherit", params=params_, json=data))
+        content_dict = json.loads(content)
+        return ChatISessionInfo(**content_dict)
+
+    def delete(self, id_: str):
+        params = {'id': id_}
+        call_until_success(lambda: self.__session.delete(f"{self.__url}/api/delete", params=params))
+
     def send(self, msg: str, id_: str):
         data = {'message': msg}
         params = {'id': id_}
@@ -91,3 +106,7 @@ class ChatI:
     def create_friend(self, id_: str, user_info: UserInfo) -> ChatISessionInfo:
         params = asdict(user_info)
         return self.create(id_, "qq-friend", params)
+
+    def inherit_friend(self, id_: str, user_info: UserInfo, memo: str, history: str) -> ChatISessionInfo:
+        params = asdict(user_info)
+        return self.inherit(id_, "qq-friend", params, memo, history)

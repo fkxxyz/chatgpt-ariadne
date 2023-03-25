@@ -3,7 +3,6 @@
 import argparse
 import json
 import pkgutil
-from dataclasses import dataclass
 
 from creart import create
 from graia.ariadne.app import Ariadne
@@ -12,9 +11,14 @@ from graia.ariadne.connection.config import (
     WebsocketClientConfig,
     config,
 )
+from graia.ariadne.console import Console
+from graia.ariadne.console.saya import ConsoleBehaviour
+from graia.broadcast import Broadcast
 from graia.saya import Saya
 
+from admin.index import Admin
 from app import instance
+from server import app as app_server
 from chati.chati import ChatI
 from config import Config
 
@@ -40,8 +44,16 @@ def main():
         WebsocketClientConfig(host=config_.websocket),
     )
 
+    bcc = create(Broadcast)
     saya = create(Saya)
     app = Ariadne(connection)
+    instance.app = app
+    instance.app_server = app_server
+    instance.admin = Admin(config_.account)
+
+    con = Console(broadcast=bcc, prompt="EroEroBot> ")
+    saya.install_behaviours(ConsoleBehaviour(con))
+
     with saya.module_context():
         for module_info in pkgutil.iter_modules(["modules"]):
             if module_info.name.startswith("_"):
