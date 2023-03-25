@@ -8,14 +8,7 @@ from graia.ariadne.connection.config import (
     config,
 )
 
-
-@dataclass
-class Config:
-    account: int
-    verify_key: str
-    http: str
-    websocket: str
-
+from config import Config
 
 with open(".test.config.json", "r") as f:
     config_ = Config(**json.load(f))

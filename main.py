@@ -14,13 +14,9 @@ from graia.ariadne.connection.config import (
 )
 from graia.saya import Saya
 
-
-@dataclass
-class Config:
-    account: int
-    verify_key: str
-    http: str
-    websocket: str
+from app import instance
+from chati.chati import ChatI
+from config import Config
 
 
 def main():
@@ -30,6 +26,11 @@ def main():
 
     with open(args.config, "r") as f:
         config_ = Config(**json.load(f))
+
+    # 初始化全局对象
+    chati = ChatI(config_.chati)
+    instance.chati = chati
+    instance.config = config_
 
     # 读取配置文件
     connection = config(
