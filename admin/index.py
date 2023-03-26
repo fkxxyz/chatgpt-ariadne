@@ -5,6 +5,7 @@ from typing import Callable, Any, Dict
 from graia.ariadne.util.async_exec import io_bound
 
 from admin.friend import *
+from admin.group import *
 from common import friend_chati_session_id
 
 
@@ -95,4 +96,22 @@ class Admin:
         return self.__await_request(
             friend_chati_session_id(self.__self_id, user_id),
             on_session_friend_send, user_id, msg,
+        )
+
+    def session_group_create(self, group_id: int) -> str:
+        return self.__await_request(
+            group_chati_session_id(self.__self_id, group_id),
+            on_session_group_create, group_id,
+        )
+
+    def session_group_inherit(self, group_id: int, memo: str, history: str) -> None:
+        return self.__await_request(
+            group_chati_session_id(self.__self_id, group_id),
+            on_session_group_inherit, group_id, memo, history,
+        )
+
+    def session_group_send(self, group_id: int, msg: str) -> str:
+        return self.__await_request(
+            group_chati_session_id(self.__self_id, group_id),
+            on_session_group_send, group_id, msg,
         )

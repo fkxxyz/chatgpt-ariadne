@@ -24,6 +24,18 @@ class UserInfo:
     level: int = 1  # chati 等级
 
 
+@dataclass
+class GroupInfo:
+    group_id: str  # 群号
+    group_name: str  # 群名
+    group_announcement: str  # 群公告
+    ai_id: str  # AI的QQ号
+    ai_nickname: str  # AI昵称
+    ai_age: str  # AI年龄
+    ai_sex: str  # AI性别
+    level: int = 65536  # chati 等级
+
+
 def call_until_success(fn: Callable[[], requests.Response]) -> bytes:
     while True:
         try:
@@ -113,3 +125,11 @@ class ChatI:
     def inherit_friend(self, id_: str, user_info: UserInfo, memo: str, history: str) -> ChatISessionInfo:
         params = asdict(user_info)
         return self.inherit(id_, "qq-friend", params, memo, history)
+
+    def create_group(self, id_: str, group_info: GroupInfo) -> ChatISessionInfo:
+        params = asdict(group_info)
+        return self.create(id_, "qq-group", params)
+
+    def inherit_group(self, id_: str, group_info: GroupInfo, memo: str, history: str) -> ChatISessionInfo:
+        params = asdict(group_info)
+        return self.inherit(id_, "qq-group", params, memo, history)

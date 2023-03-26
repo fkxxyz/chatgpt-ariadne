@@ -9,7 +9,7 @@ if [ "$BASIC_AUTH" ]; then
   EXTRA_CURL_ARGS+=("--user" "$BASIC_AUTH")
 fi
 
-cmd_create() {
+cmd_fcreate() {
   local user_id="$1"
   local comment="$2"
   local source="$3"
@@ -25,7 +25,7 @@ cmd_create() {
   return "$exit_code"
 }
 
-cmd_inherit() {
+cmd_finherit() {
   local user_id="$1"
   local memo="$2"
   local history="$3"
@@ -41,7 +41,7 @@ cmd_inherit() {
   return "$exit_code"
 }
 
-cmd_send() {
+cmd_fsend() {
   local user_id="$1"
   local message="$2"
   local result_str exit_code=0
@@ -56,13 +56,61 @@ cmd_send() {
   return "$exit_code"
 }
 
+cmd_gcreate() {
+  local group_id="$1"
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X PUT --data-binary "{}" \
+      "$ARIADNE_ADMIN/api/group/create?group_id=${group_id}"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_ginherit() {
+  local group_id="$1"
+  local memo="$2"
+  local history="$3"
+  data="$(jq --arg memo "$memo" --arg history "$history" '{memo: $memo, history: $history}' <<< "{}")"
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X PUT --data-binary "$data" \
+      "$ARIADNE_ADMIN/api/group/inherit?group_id=${group_id}"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_gsend() {
+  local group_id="$1"
+  local message="$2"
+  local result_str exit_code=0
+  data="$(jq --arg message "$message" '{message: $message}' <<< "{}")"
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X POST --data-binary "$data" \
+      "$ARIADNE_ADMIN/api/group/send?group_id=${group_id}"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
 cmd_help(){
   printf 'Usage: %s COMMAND
 
 Commands:
-  create <user_id> [<comment>] [<source>]
-  inherit <user_id> <memo> <history>
-  send <user_id> <message>
+  fcreate <user_id> [<comment>] [<source>]
+  finherit <user_id> <memo> <history>
+  fsend <user_id> <message>
+
+  gcreate <group_id>
+  ginherit <group_id> <memo> <history>
+  gsend <group_id> <message>
 
   help
 ' "$0"

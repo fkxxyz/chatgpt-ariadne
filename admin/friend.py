@@ -40,10 +40,14 @@ async def on_session_friend_create(app: Ariadne, user_id: int, comment: str, sou
         add_source=source,  # 加好友时的来源
         add_comment=comment,  # 加好友时的附加消息
     )
-    resp = await utils.create_session_chati(session_id, user_info)
+    resp = await utils.create_session_friend_chati(session_id, user_info)
 
     # 发送 chati 的回复给好友
-    await app.send_friend_message(user_id, resp.msg)
+    try:
+        await utils.send_friend_message(app, friend, resp.msg)
+    except Exception as err:
+        await utils.send_to_master(app, f"发送好友消息失败（{friend.id}），已放弃: {str(err)}")
+        return resp.msg
 
     return resp.msg
 
@@ -80,7 +84,7 @@ async def on_session_friend_inherit(app: Ariadne, user_id: int, memo: str, histo
         add_source="",  # 加好友时的来源
         add_comment="",  # 加好友时的附加消息
     )
-    await utils.inherit_session_chati(session_id, user_info, memo, history)
+    await utils.inherit_session_friend_chati(session_id, user_info, memo, history)
 
 
 async def on_session_friend_send(app: Ariadne, user_id: int, msg: str) -> str:
@@ -94,6 +98,10 @@ async def on_session_friend_send(app: Ariadne, user_id: int, msg: str) -> str:
     resp = await utils.send_to_chati(msg, session_id)
 
     # 发送 chati 的回复给好友
-    await app.send_friend_message(user_id, resp.msg)
+    try:
+        await utils.send_friend_message(app, friend, resp.msg)
+    except Exception as err:
+        await utils.send_to_master(app, f"发送好友消息失败（{friend.id}），已放弃: {str(err)}")
+        return resp.msg
 
     return resp.msg
