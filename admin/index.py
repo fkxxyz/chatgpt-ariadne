@@ -2,6 +2,8 @@ import threading
 from dataclasses import dataclass
 from typing import Callable, Any, Dict
 
+from graia.ariadne.util.async_exec import io_bound
+
 from admin.friend import *
 from common import friend_chati_session_id
 
