@@ -1,5 +1,10 @@
+import time
+
+import graia.ariadne.exception
 from graia.ariadne import Ariadne
+from graia.ariadne.model import Friend
 from graia.ariadne.util.async_exec import io_bound
+from loguru import logger
 
 from app import instance
 from chati.chati import SessionMessageResponse, UserInfo
@@ -11,7 +16,25 @@ async def send_to_master(app: Ariadne, msg: str):
             friend = await app.get_friend(master, assertion=True, cache=True)
         except ValueError:
             continue
-        await app.send_message(friend, msg)
+        try:
+            await app.send_message(friend, msg)
+        except Exception:
+            continue
+
+
+async def send_friend_message(app: Ariadne, friend: Friend, msg: str):
+    # 尝试发送三次
+    for i in range(3):
+        try:
+            await app.send_message(friend, msg)
+            return
+        except graia.ariadne.exception.RemoteException as err:
+            logger.error(f"发送消息给好友失败（{friend.id}）: {str(err)}")
+            await send_to_master(app, f"发送消息给好友失败（{friend.id}）: {str(err)}")
+            if i == 2:
+                raise err
+            time.sleep((i + 1) * 3)
+            continue
 
 
 @io_bound
