@@ -1,6 +1,5 @@
 from graia.ariadne import Ariadne
 from graia.ariadne.model import Friend, Profile
-from graia.ariadne.util.async_exec import io_bound
 
 import utils
 from admin import error
@@ -31,7 +30,7 @@ async def on_session_friend_create(app: Ariadne, user_id: int, comment: str, sou
     # 创建 chati 会话
     user_info = UserInfo(
         user_id=str(user_id),  # 用户QQ号
-        user_nickname=friend.nickname,  # 用户昵称
+        user_nickname=friend_profile.nickname,  # 用户昵称
         user_age=str(friend_profile.age),  # 用户年龄
         user_sex=friend_profile.sex,  # 用户性别
         ai_id=str(app.account),  # AI的QQ号
