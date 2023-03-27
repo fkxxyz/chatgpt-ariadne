@@ -17,7 +17,7 @@ channel = Channel.current()
 
 @channel.use(ListenerSchema(listening_events=[BotInvitedJoinGroupRequestEvent]))
 async def group_invite_listener(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
-    await event.accept("")
+    await event.reject("")
 
 
 @channel.use(ListenerSchema(listening_events=[BotJoinGroupEvent]))
@@ -70,6 +70,11 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         msg = msg[4:]
 
     session_id = group_chati_session_id(app.account, event.sender.group.id)
+
+    try:
+        instance.chati.info(session_id)
+    except RuntimeError as e:
+        return
 
     try:
         reply = await utils.send_to_chati(msg, session_id)

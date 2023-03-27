@@ -83,6 +83,12 @@ class ChatI:
         content_dict = json.loads(content)
         return ChatISessionInfo(**content_dict)
 
+    def info(self, id_: str):
+        params = {'id': id_}
+        content = call_until_success(lambda: self.__session.get(f"{self.__url}/api/info", params=params))
+        content_dict = json.loads(content)
+        return content_dict
+
     def inherit(self, id_: str, type_: str, params: dict, memo: str, history: str) -> ChatISessionInfo:
         params_ = {'id': id_, 'type': type_}
         data = {
