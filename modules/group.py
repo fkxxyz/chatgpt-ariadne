@@ -49,7 +49,7 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
         reply = await utils.create_session_group_chati(session_id, group_info)
     except RuntimeError as e:
         await master_cor
-        await utils.send_to_master(app, f"创建群组会话失败： {e}")
+        await utils.send_to_master(app, f"创建群组会话（{event.group.id}）失败： {e}")
         return
     await master_cor
     try:
@@ -79,7 +79,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     try:
         reply = await utils.send_to_chati(msg, session_id)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送群组消息给 AI 失败： {e}")
+        await utils.send_to_master(app, f"发送群组消息（{event.sender.id}）给 AI 失败： {e}")
         return
     message_chain = MessageChain([At(event.sender), reply.msg])
     try:

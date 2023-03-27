@@ -46,7 +46,7 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
         reply = await utils.create_session_friend_chati(session_id, user_info)
     except RuntimeError as e:
         await master_cor
-        await utils.send_to_master(app, f"创建好友会话失败： {e}")
+        await utils.send_to_master(app, f"创建好友会话（{event.supplicant}）失败： {e}")
         return
     await master_cor
     await event.accept()
@@ -71,7 +71,7 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     try:
         reply = await utils.send_to_chati(event.message_chain.display, session_id)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送消息给 AI 失败： {e}")
+        await utils.send_to_master(app, f"发送好友消息（{event.supplicant}）给 AI 失败： {e}")
         return
     try:
         await utils.send_friend_message(app, event.sender, reply.msg)
