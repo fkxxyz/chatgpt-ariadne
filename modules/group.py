@@ -17,7 +17,10 @@ channel = Channel.current()
 
 @channel.use(ListenerSchema(listening_events=[BotInvitedJoinGroupRequestEvent]))
 async def group_invite_listener(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
-    await event.reject("")
+    if event.supplicant in instance.config.masters:
+        await event.accept()
+    else:
+        await event.reject()
 
 
 @channel.use(ListenerSchema(listening_events=[BotJoinGroupEvent]))
@@ -79,11 +82,13 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     try:
         reply = await utils.send_to_chati(msg, session_id)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送群组消息（{event.sender.id}）给 AI 失败： {e}")
+        await utils.send_to_master(app, f"发送群组消息（{event.sender.group.id}）给 AI 失败： {str(e)}")
+        await utils.send_group_message(app, event.sender.group,
+                                       MessageChain([At(event.sender), f' 抱歉，我服务器似乎出了点问题： {str(e)}']))
         return
-    message_chain = MessageChain([At(event.sender), reply.msg])
+    message_chain = MessageChain([At(event.sender), ' ' + reply.msg])
     try:
         await utils.send_group_message(app, event.sender.group, message_chain)
     except Exception as err:
-        await utils.send_to_master(app, f"发送群组消息失败（{event.sender.id}），已放弃: {str(err)}")
+        await utils.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
         return

@@ -24,7 +24,8 @@ def admin_server():
     serv = create_server(
         instance.app_server,
         host=instance.config.listen,
-        port=instance.config.port
+        port=instance.config.port,
+        threads=256,
     )
     serv.run()
 

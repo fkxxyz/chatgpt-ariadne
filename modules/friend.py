@@ -71,7 +71,8 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     try:
         reply = await utils.send_to_chati(event.message_chain.display, session_id)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送好友消息（{event.supplicant}）给 AI 失败： {e}")
+        await utils.send_to_master(app, f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)}")
+        await utils.send_friend_message(app, event.sender, f'抱歉，我服务器似乎出了点问题： {str(e)}')
         return
     try:
         await utils.send_friend_message(app, event.sender, reply.msg)
