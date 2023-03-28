@@ -25,6 +25,16 @@ async def group_invite_listener(app: Ariadne, event: BotInvitedJoinGroupRequestE
 
 @channel.use(ListenerSchema(listening_events=[BotJoinGroupEvent]))
 async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
+    # 如果该群没有任何 master 成员群聊，则退群
+    members = await app.get_member_list(event.group)
+    members_set = {member.id for member in members}
+    for master in instance.config.masters:
+        if master in members_set:
+            break
+    else:
+        await app.quit_group(event.group)
+        return
+
     session_id = group_chati_session_id(app.account, event.group.id)
     group_config = await app.get_group_config(event.group)
     profile = await app.get_bot_profile()
