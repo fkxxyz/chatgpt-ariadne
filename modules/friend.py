@@ -64,16 +64,30 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
     await utils.send_to_master(app, f"已成功同意好友申请（{event.supplicant}）")
 
 
+busy_friend = set()
+
+
 @channel.use(ListenerSchema(listening_events=[FriendMessage]))
 async def friend_message_listener(app: Ariadne, event: FriendMessage):
+    # 忽略自己
+    if event.sender.id == app.account:
+        return
+
     session_id = friend_chati_session_id(app.account, event.sender.id)
 
+    if session_id in busy_friend:
+        await utils.send_friend_message(app, event.sender, "消息太快啦，稍等一下吧")
+        return
+
+    busy_friend.add(session_id)
     try:
         reply = await utils.send_to_chati(event.message_chain.display, session_id)
     except RuntimeError as e:
         await utils.send_to_master(app, f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)}")
         await utils.send_friend_message(app, event.sender, f'抱歉，我服务器似乎出了点问题： {str(e)}')
         return
+    finally:
+        busy_friend.remove(session_id)
     try:
         await utils.send_friend_message(app, event.sender, reply.msg)
     except Exception as err:

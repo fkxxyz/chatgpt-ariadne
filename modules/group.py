@@ -62,6 +62,9 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
         return
 
 
+busy_group = set()
+
+
 @channel.use(ListenerSchema(listening_events=[GroupMessage]))
 async def group_message_listener(app: Ariadne, event: GroupMessage):
     msg = event.message_chain.display
@@ -79,6 +82,11 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     except RuntimeError as e:
         return
 
+    if event.sender.group.id in busy_group:
+        await utils.send_group_message(app, event.sender.group, MessageChain([At(event.sender), ' 消息太快啦，稍等一下吧']))
+        return
+
+    busy_group.add(event.sender.group.id)
     try:
         reply = await utils.send_to_chati(msg, session_id)
     except RuntimeError as e:
@@ -86,6 +94,8 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         await utils.send_group_message(app, event.sender.group,
                                        MessageChain([At(event.sender), f' 抱歉，我服务器似乎出了点问题： {str(e)}']))
         return
+    finally:
+        busy_group.remove(event.sender.group.id)
     message_chain = MessageChain([At(event.sender), ' ' + reply.msg])
     try:
         await utils.send_group_message(app, event.sender.group, message_chain)
