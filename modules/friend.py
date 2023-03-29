@@ -26,6 +26,7 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
         f"昵称： {event.nickname}\n"
         f"附加消息： {event.message}"
     )
+    return
     user_info = UserInfo(
         user_id=str(event.supplicant),  # 用户QQ号
         user_nickname=event.nickname,  # 用户昵称
