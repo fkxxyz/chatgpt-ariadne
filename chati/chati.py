@@ -33,6 +33,7 @@ class GroupInfo:
     ai_nickname: str  # AI昵称
     ai_age: str  # AI年龄
     ai_sex: str  # AI性别
+    welcome_prompt: str  # 新人入群欢迎语生成的提示词
     level: int = 65536  # chati 等级
 
 
@@ -110,6 +111,11 @@ class ChatI:
         content = call_until_success(lambda: self.__session.post(f"{self.__url}/api/send", params=params, json=data))
         content_dict = json.loads(content)
         return content_dict
+
+    def send_once(self, prompt: str) -> str:
+        data = {'message': prompt}
+        content = call_until_success(lambda: self.__session.post(f"{self.__url}/api/once", json=data))
+        return content.decode()
 
     def get(self, id_: str) -> SessionMessageResponse:
         params = {'id': id_}

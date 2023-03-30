@@ -36,6 +36,7 @@ async def on_session_group_create(app: Ariadne, group_id: int) -> str:
         ai_nickname=profile.nickname,  # AI昵称
         ai_age=str(profile.age),  # AI年龄
         ai_sex=profile.sex,  # AI性别
+        welcome_prompt="",
     )
     resp = await utils.create_session_group_chati(session_id, group_info)
 
@@ -77,6 +78,7 @@ async def on_session_group_inherit(app: Ariadne, group_id: int, memo: str, histo
         ai_nickname=profile.nickname,  # AI昵称
         ai_age=str(profile.age),  # AI年龄
         ai_sex=profile.sex,  # AI性别
+        welcome_prompt="",
     )
     await utils.inherit_session_group_chati(session_id, group_info, memo, history)
 
