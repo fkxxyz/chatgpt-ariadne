@@ -101,3 +101,16 @@ async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
         return resp.msg
 
     return resp.msg
+
+
+async def on_group_welcome_prompt(app: Ariadne, group_id: int, prompt: str):
+    # 获取群组对象
+    group: Group | None = await app.get_group(group_id, cache=True)
+    if group is None:
+        raise error.FriendNotFoundError(f"群组 {group_id} 不存在")
+
+    session_id = group_chati_session_id(app.account, group_id)
+
+    instance.chati.set_params(session_id, {
+        "welcome_prompt": prompt,
+    })

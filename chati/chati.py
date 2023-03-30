@@ -112,6 +112,10 @@ class ChatI:
         content_dict = json.loads(content)
         return content_dict
 
+    def set_params(self, id_: str, new_params: dict):
+        params = {'id': id_}
+        call_until_success(lambda: self.__session.post(f"{self.__url}/api/params", params=params, json=new_params))
+
     def send_once(self, prompt: str) -> str:
         data = {'message': prompt}
         content = call_until_success(lambda: self.__session.post(f"{self.__url}/api/once", json=data))

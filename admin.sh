@@ -100,6 +100,21 @@ cmd_gsend() {
   return "$exit_code"
 }
 
+cmd_gwelcome() {
+  local group_id="$1"
+  local prompt="$2"
+  local result_str exit_code=0
+  data="$(jq --arg prompt "$prompt" '{prompt: $prompt}' <<< "{}")"
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X PUT --data-binary "$data" \
+      "$ARIADNE_ADMIN/api/group/welcome?group_id=${group_id}"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
 cmd_help(){
   printf 'Usage: %s COMMAND
 
@@ -111,6 +126,7 @@ Commands:
   gcreate <group_id>
   ginherit <group_id> <memo> <history>
   gsend <group_id> <message>
+  gwelcome <group_id> <prompt>
 
   help
 ' "$0"
