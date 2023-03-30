@@ -3,7 +3,7 @@ from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.event.mirai import BotJoinGroupEvent, BotInvitedJoinGroupRequestEvent, MemberJoinEvent
 from graia.ariadne.message.element import At
-from graia.ariadne.model import Member
+from graia.ariadne.model import Member, Profile
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
@@ -73,11 +73,11 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
         return
 
 
-def generate_welcome_prompt(group_info: GroupInfo, member: Member) -> str:
+def generate_welcome_prompt(group_info: GroupInfo, member: Member, profile: Profile) -> str:
     if len(group_info.welcome_prompt) == 0:
         return f"你已接入腾讯QQ平台，你的QQ号是{group_info.ai_id}，昵称是{group_info.ai_nickname}" \
                f"你正在一个群组里，群号是{group_info.group_id}，群名是{group_info.group_name}" \
-               f"现在有一个新人入群了，QQ号是{member.id}，昵称是{member.name}" \
+               f"现在有一个新人入群了，QQ号是{member.id}，昵称是{member.name}，年龄{profile.age}，性别{profile.sex}" \
                f"请生成欢迎语（30个字以内）："
     else:
         prompt = group_info.welcome_prompt
@@ -87,6 +87,8 @@ def generate_welcome_prompt(group_info: GroupInfo, member: Member) -> str:
         prompt = prompt.replace("{ai_name}", group_info.ai_nickname)
         prompt = prompt.replace("{user_id}", str(member.id))
         prompt = prompt.replace("{user_name}", member.name)
+        prompt = prompt.replace("{user_age}", str(profile.age))
+        prompt = prompt.replace("{user_sex}", profile.sex)
         return prompt
 
 
@@ -98,7 +100,8 @@ async def group_member_join_listener(app: Ariadne, event: MemberJoinEvent):
     except RuntimeError as e:
         return
     group_info = GroupInfo(**session_info["params"])
-    welcome_prompt = generate_welcome_prompt(group_info, event.member)
+    profile = await event.member.get_profile()
+    welcome_prompt = generate_welcome_prompt(group_info, event.member, profile)
     try:
         reply = instance.chati.send_once(welcome_prompt)
     except RuntimeError as e:
