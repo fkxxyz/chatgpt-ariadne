@@ -2,7 +2,7 @@ from asyncio import AbstractEventLoop, Task
 from typing import Optional
 
 from graia.ariadne import Ariadne
-from graia.ariadne.event.lifecycle import ApplicationLaunched, ApplicationShutdowned, ApplicationLifecycleEvent
+from graia.ariadne.event.lifecycle import ApplicationLaunched, ApplicationShutdowned
 from graia.ariadne.util.async_exec import io_bound
 from graia.saya import Channel
 from loguru import logger

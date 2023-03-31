@@ -7,7 +7,8 @@ from graia.ariadne.event.mirai import NewFriendRequestEvent
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-import utils
+import utils.message
+import utils.chati
 from app import instance
 from chati.chati import UserInfo
 from common import friend_chati_session_id
@@ -19,7 +20,7 @@ channel = Channel.current()
 async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent):
     session_id = friend_chati_session_id(app.account, event.supplicant)
     profile = await app.get_bot_profile()
-    master_cor = utils.send_to_master(
+    master_cor = utils.message.send_to_master(
         app,
         f"我收到好友申请\n"
         f"QQ： {event.supplicant}\n"
@@ -44,10 +45,10 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
     except RuntimeError as e:
         pass
     try:
-        reply = await utils.create_session_friend_chati(session_id, user_info)
+        reply = await utils.chati.create_session_friend_chati(session_id, user_info)
     except RuntimeError as e:
         await master_cor
-        await utils.send_to_master(app, f"创建好友会话（{event.supplicant}）失败： {e}")
+        await utils.message.send_to_master(app, f"创建好友会话（{event.supplicant}）失败： {e}")
         return
     await master_cor
     await event.accept()
@@ -55,14 +56,14 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
     friend = await app.get_friend(event.supplicant)
     if friend is None:
         # 获取好友失败
-        await utils.send_to_master(app, f"获取好友失败（{event.supplicant}）")
+        await utils.message.send_to_master(app, f"获取好友失败（{event.supplicant}）")
         return
     try:
-        await utils.send_friend_message(app, friend, reply.msg)
+        await utils.message.send_friend_message(app, friend, reply.msg)
     except Exception as err:
-        await utils.send_to_master(app, f"发送好友消息失败（{event.supplicant}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送好友消息失败（{event.supplicant}），已放弃: {str(err)}")
         return
-    await utils.send_to_master(app, f"已成功同意好友申请（{event.supplicant}）")
+    await utils.message.send_to_master(app, f"已成功同意好友申请（{event.supplicant}）")
 
 
 busy_friend = set()
@@ -77,20 +78,20 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     session_id = friend_chati_session_id(app.account, event.sender.id)
 
     if session_id in busy_friend:
-        await utils.send_friend_message(app, event.sender, "消息太快啦，稍等一下吧")
+        await utils.message.send_friend_message(app, event.sender, "消息太快啦，稍等一下吧")
         return
 
     busy_friend.add(session_id)
     try:
-        reply = await utils.send_to_chati(event.message_chain.display, session_id)
+        reply = await utils.chati.send_to_chati(event.message_chain.display, session_id)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)}")
-        await utils.send_friend_message(app, event.sender, f'抱歉，我服务器似乎出了点问题： {str(e)}')
+        await utils.message.send_to_master(app, f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)}")
+        await utils.message.send_friend_message(app, event.sender, f'抱歉，我服务器似乎出了点问题： {str(e)}')
         return
     finally:
         busy_friend.remove(session_id)
     try:
-        await utils.send_friend_message(app, event.sender, reply.msg)
+        await utils.message.send_friend_message(app, event.sender, reply.msg)
     except Exception as err:
-        await utils.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
         return

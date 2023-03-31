@@ -4,7 +4,7 @@ from graia.ariadne.console.saya import ConsoleSchema
 from graia.ariadne.message.parser.twilight import MatchResult, Twilight
 from graia.saya import Channel
 
-from utils import send_to_master
+from utils.message import send_to_master
 
 channel = Channel.current()
 

@@ -7,7 +7,8 @@ from graia.ariadne.model import Member, Profile
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-import utils
+import utils.message
+import utils.chati
 from app import instance
 from chati.chati import GroupInfo
 from common import group_chati_session_id
@@ -38,7 +39,7 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
     session_id = group_chati_session_id(app.account, event.group.id)
     group_config = await app.get_group_config(event.group)
     profile = await app.get_bot_profile()
-    master_cor = utils.send_to_master(
+    master_cor = utils.message.send_to_master(
         app,
         f"我已加入群组\n"
         f"群号： {event.group.id}\n"
@@ -60,16 +61,16 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
     except RuntimeError as e:
         pass
     try:
-        reply = await utils.create_session_group_chati(session_id, group_info)
+        reply = await utils.chati.create_session_group_chati(session_id, group_info)
     except RuntimeError as e:
         await master_cor
-        await utils.send_to_master(app, f"创建群组会话（{event.group.id}）失败： {e}")
+        await utils.message.send_to_master(app, f"创建群组会话（{event.group.id}）失败： {e}")
         return
     await master_cor
     try:
-        await utils.send_group_message(app, event.group, reply.msg)
+        await utils.message.send_group_message(app, event.group, reply.msg)
     except Exception as err:
-        await utils.send_to_master(app, f"发送群组消息失败（{event.group.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送群组消息失败（{event.group.id}），已放弃: {str(err)}")
         return
 
 
@@ -105,13 +106,13 @@ async def group_member_join_listener(app: Ariadne, event: MemberJoinEvent):
     try:
         reply = instance.chati.send_once(welcome_prompt)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送欢迎新人提示消息（{event.member.group.id}）给 AI 失败： {str(e)}")
+        await utils.message.send_to_master(app, f"发送欢迎新人提示消息（{event.member.group.id}）给 AI 失败： {str(e)}")
         return
     message_chain = MessageChain([At(event.member), ' ' + reply])
     try:
-        await utils.send_group_message(app, event.member.group, message_chain)
+        await utils.message.send_group_message(app, event.member.group, message_chain)
     except Exception as err:
-        await utils.send_to_master(app, f"发送群组消息失败（{event.member.group.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送群组消息失败（{event.member.group.id}），已放弃: {str(err)}")
         return
 
 
@@ -136,22 +137,23 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         return
 
     if event.sender.group.id in busy_group:
-        await utils.send_group_message(app, event.sender.group, MessageChain([At(event.sender), ' 消息太快啦，稍等一下吧']))
+        await utils.message.send_group_message(app, event.sender.group,
+                                               MessageChain([At(event.sender), ' 消息太快啦，稍等一下吧']))
         return
 
     busy_group.add(event.sender.group.id)
     try:
-        reply = await utils.send_to_chati(msg, session_id)
+        reply = await utils.chati.send_to_chati(msg, session_id)
     except RuntimeError as e:
-        await utils.send_to_master(app, f"发送群组消息（{event.sender.group.id}）给 AI 失败： {str(e)}")
-        await utils.send_group_message(app, event.sender.group,
-                                       MessageChain([At(event.sender), f' 抱歉，我服务器似乎出了点问题： {str(e)}']))
+        await utils.message.send_to_master(app, f"发送群组消息（{event.sender.group.id}）给 AI 失败： {str(e)}")
+        await utils.message.send_group_message(app, event.sender.group,
+                                               MessageChain([At(event.sender), f' 抱歉，我服务器似乎出了点问题： {str(e)}']))
         return
     finally:
         busy_group.remove(event.sender.group.id)
     message_chain = MessageChain([At(event.sender), ' ' + reply.msg])
     try:
-        await utils.send_group_message(app, event.sender.group, message_chain)
+        await utils.message.send_group_message(app, event.sender.group, message_chain)
     except Exception as err:
-        await utils.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
         return

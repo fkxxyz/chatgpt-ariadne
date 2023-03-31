@@ -1,7 +1,8 @@
 from graia.ariadne import Ariadne
 from graia.ariadne.model import Group, GroupConfig
 
-import utils
+import utils.message
+import utils.chati
 from admin import error
 from app import instance
 from chati.chati import GroupInfo
@@ -38,13 +39,13 @@ async def on_session_group_create(app: Ariadne, group_id: int) -> str:
         ai_sex=profile.sex,  # AI性别
         welcome_prompt="",
     )
-    resp = await utils.create_session_group_chati(session_id, group_info)
+    resp = await utils.chati.create_session_group_chati(session_id, group_info)
 
     # 发送 chati 的回复给群组
     try:
-        await utils.send_group_message(app, group, resp.msg)
+        await utils.message.send_group_message(app, group, resp.msg)
     except Exception as err:
-        await utils.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
         return resp.msg
 
     return resp.msg
@@ -80,7 +81,7 @@ async def on_session_group_inherit(app: Ariadne, group_id: int, memo: str, histo
         ai_sex=profile.sex,  # AI性别
         welcome_prompt="",
     )
-    await utils.inherit_session_group_chati(session_id, group_info, memo, history)
+    await utils.chati.inherit_session_group_chati(session_id, group_info, memo, history)
 
 
 async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
@@ -91,13 +92,13 @@ async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
 
     # 发送消息给 chati
     session_id = group_chati_session_id(app.account, group_id)
-    resp = await utils.send_to_chati(msg, session_id)
+    resp = await utils.chati.send_to_chati(msg, session_id)
 
     # 发送 chati 的回复给群组
     try:
-        await utils.send_group_message(app, group, resp.msg)
+        await utils.message.send_group_message(app, group, resp.msg)
     except Exception as err:
-        await utils.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
         return resp.msg
 
     return resp.msg
