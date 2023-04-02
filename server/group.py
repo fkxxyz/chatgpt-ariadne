@@ -4,7 +4,6 @@ import flask
 
 from admin import error
 from app import instance
-from common import group_chati_session_id
 from server import app
 
 
@@ -94,7 +93,7 @@ def handle_group_welcome():
         return flask.make_response('error: missing prompt in json', http.HTTPStatus.BAD_REQUEST)
 
     try:
-        instance.admin.on_group_welcome_prompt(group_id, prompt)
+        instance.admin.group_welcome_prompt(group_id, prompt)
     except error.AdminError as e:
         return flask.make_response(str(e), e.HttpStatus)
     except Exception as e:

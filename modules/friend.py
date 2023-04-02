@@ -1,8 +1,10 @@
 import time
 
+from graia.amnesia.message import MessageChain
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import FriendMessage
 from graia.ariadne.event.mirai import NewFriendRequestEvent
+from graia.ariadne.message.element import Plain
 
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -59,7 +61,7 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
         await utils.message.send_to_master(app, f"获取好友失败（{event.supplicant}）")
         return
     try:
-        await utils.message.send_friend_message(app, friend, reply.msg)
+        await utils.message.send_friend_message(app, friend, MessageChain(Plain(reply.msg)))
     except Exception as err:
         await utils.message.send_to_master(app, f"发送好友消息失败（{event.supplicant}），已放弃: {str(err)}")
         return
@@ -78,7 +80,7 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     session_id = friend_chati_session_id(app.account, event.sender.id)
 
     if session_id in busy_friend:
-        await utils.message.send_friend_message(app, event.sender, "消息太快啦，稍等一下吧")
+        await utils.message.send_friend_message(app, event.sender, MessageChain([Plain("消息太快啦，稍等一下吧")]))
         return
 
     busy_friend.add(session_id)
@@ -86,12 +88,16 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
         reply = await utils.chati.send_to_chati(event.message_chain.display, session_id)
     except RuntimeError as e:
         await utils.message.send_to_master(app, f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)}")
-        await utils.message.send_friend_message(app, event.sender, f'抱歉，我服务器似乎出了点问题： {str(e)}')
+        await utils.message.send_friend_message(app, event.sender, MessageChain([Plain(f'抱歉，我服务器似乎出了点问题： {str(e)}')]))
         return
     finally:
         busy_friend.remove(session_id)
+    message = [Plain(reply.msg)]
+    message = instance.middlewares.execute(message)
     try:
-        await utils.message.send_friend_message(app, event.sender, reply.msg)
-    except Exception as err:
-        await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
-        return
+        await utils.message.send_friend_message(app, event.sender, MessageChain(message))
+    # except Exception as err:
+    #     await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
+    #     return
+    finally:
+        pass

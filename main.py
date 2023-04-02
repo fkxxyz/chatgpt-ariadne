@@ -16,6 +16,9 @@ from graia.ariadne.console.saya import ConsoleBehaviour
 from graia.broadcast import Broadcast
 from graia.saya import Saya
 
+import common
+import middleware.sensitive_replace
+import utils.sensitive
 from admin.index import Admin
 from app import instance
 from server import app as app_server
@@ -35,6 +38,10 @@ def main():
     chati = ChatI(config_.chati)
     instance.chati = chati
     instance.config = config_
+    instance.sensitive = utils.sensitive.SensitiveFilter(config_.sensitive1, config_.sensitive2)
+    instance.middlewares = common.MiddleWaresExecutor([
+        middleware.sensitive_replace.SensitiveReplaceMiddleware(),
+    ])
 
     # 读取配置文件
     connection = config(

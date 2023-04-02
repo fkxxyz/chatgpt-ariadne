@@ -116,7 +116,7 @@ class Admin:
             on_session_group_send, group_id, msg,
         )
 
-    def on_group_welcome_prompt(self, group_id: int, prompt: str):
+    def group_welcome_prompt(self, group_id: int, prompt: str):
         return self.__await_request(
             group_chati_session_id(self.__self_id, group_id),
             on_group_welcome_prompt, group_id, prompt,

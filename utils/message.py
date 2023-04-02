@@ -21,11 +21,11 @@ async def send_to_master(app: Ariadne, msg: str):
             continue
 
 
-async def send_friend_message(app: Ariadne, friend: Friend, msg: str):
+async def send_friend_message(app: Ariadne, friend: Friend, message_chain: MessageChain):
     # 尝试发送三次
     for i in range(3):
         try:
-            await app.send_friend_message(friend, msg)
+            await app.send_friend_message(friend, message_chain)
             return
         except graia.ariadne.exception.RemoteException as err:
             logger.error(f"发送消息给好友失败（{friend.id}）: {str(err)}")

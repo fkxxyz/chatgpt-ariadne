@@ -115,6 +115,78 @@ cmd_gwelcome() {
   return "$exit_code"
 }
 
+cmd_sget1() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X GET \
+      "$ARIADNE_ADMIN/api/sensitive?id=1"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_sget2() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X GET \
+      "$ARIADNE_ADMIN/api/sensitive?id=2"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_sadd1() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X PUT --data-binary @- \
+      "$ARIADNE_ADMIN/api/sensitive?id=1"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_sadd2() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X PUT --data-binary @- \
+      "$ARIADNE_ADMIN/api/sensitive?id=2"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_sdel1() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X DELETE --data-binary @- \
+      "$ARIADNE_ADMIN/api/sensitive?id=1"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
+cmd_sdel2() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -H "Content-Type: application/json" \
+      -X DELETE --data-binary @- \
+      "$ARIADNE_ADMIN/api/sensitive?id=2"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
 cmd_help(){
   printf 'Usage: %s COMMAND
 
@@ -127,6 +199,13 @@ Commands:
   ginherit <group_id> <memo> <history>
   gsend <group_id> <message>
   gwelcome <group_id> <prompt>
+
+  sget1
+  sget2
+  sadd1 < <stdin>
+  sadd2 < <stdin>
+  sdel1 < <stdin>
+  sdel2 < <stdin>
 
   help
 ' "$0"

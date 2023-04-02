@@ -11,3 +11,5 @@ class Config:
     masters: list[int]
     listen: str
     port: int
+    sensitive1: str
+    sensitive2: str

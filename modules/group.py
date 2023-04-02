@@ -2,7 +2,7 @@ from graia.amnesia.message import MessageChain
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.event.mirai import BotJoinGroupEvent, BotInvitedJoinGroupRequestEvent, MemberJoinEvent
-from graia.ariadne.message.element import At
+from graia.ariadne.message.element import At, Plain
 from graia.ariadne.model import Member, Profile
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -153,9 +153,10 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         return
     finally:
         busy_group.remove(event.sender.group.id)
-    message_chain = MessageChain([At(event.sender), ' ' + reply.msg])
+    message = [At(event.sender), Plain(' ' + reply.msg)]
+    message = instance.middlewares.execute(message)
     try:
-        await utils.message.send_group_message(app, event.sender.group, message_chain)
+        await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
     except Exception as err:
         await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
         return
