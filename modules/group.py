@@ -121,6 +121,8 @@ busy_group = set()
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage]))
 async def group_message_listener(app: Ariadne, event: GroupMessage):
+    if event.sender.id == 2854196310:  # 忽略Q群管家
+        return
     msg = event.message_chain.display
     if not msg.startswith("gpt "):
         if not At(app.account) in event.message_chain:
