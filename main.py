@@ -18,6 +18,7 @@ from graia.saya import Saya
 
 import common
 import middleware.sensitive_replace
+import middleware.latex2text
 import utils.sensitive
 from admin.index import Admin
 from app import instance
@@ -40,6 +41,7 @@ def main():
     instance.config = config_
     instance.sensitive = utils.sensitive.SensitiveFilter(config_.sensitive1, config_.sensitive2)
     instance.middlewares = common.MiddleWaresExecutor([
+        middleware.latex2text.Latex2TextMiddleware(),
         middleware.sensitive_replace.SensitiveReplaceMiddleware(),
     ])
 
