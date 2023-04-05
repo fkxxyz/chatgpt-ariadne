@@ -97,8 +97,6 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     message = instance.middlewares.execute(message)
     try:
         await utils.message.send_friend_message(app, event.sender, MessageChain(message))
-    # except Exception as err:
-    #     await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
-    #     return
-    finally:
-        pass
+    except Exception as err:
+        await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
+        return
