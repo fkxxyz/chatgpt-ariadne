@@ -4,7 +4,7 @@ from graia.amnesia.message import MessageChain
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import FriendMessage
 from graia.ariadne.event.mirai import NewFriendRequestEvent
-from graia.ariadne.message.element import Plain
+from graia.ariadne.message.element import Plain, Image
 
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -62,7 +62,7 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
         await utils.message.send_to_master(app, f"获取好友失败（{event.supplicant}）")
         return
     try:
-        await utils.message.send_friend_message(app, friend, MessageChain(Plain(reply.msg)))
+        await utils.message.send_friend_message(app, friend, MessageChain([Plain(reply)]))
     except Exception as err:
         await utils.message.send_to_master(app, f"发送好友消息失败（{event.supplicant}），已放弃: {str(err)}")
         return
@@ -93,8 +93,8 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
         return
     finally:
         busy_friend.remove(session_id)
-    message = [Plain(reply.msg)]
-    message = instance.middlewares.execute(message)
+    message = [Plain(reply)]
+    message = await instance.middlewares.execute(message)
     try:
         await utils.message.send_friend_message(app, event.sender, MessageChain(message))
     except Exception as err:

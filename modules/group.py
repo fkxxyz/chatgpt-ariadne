@@ -68,7 +68,7 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
         return
     await master_cor
     try:
-        await utils.message.send_group_message(app, event.group, reply.msg)
+        await utils.message.send_group_message(app, event.group, reply)
     except Exception as err:
         await utils.message.send_to_master(app, f"发送群组消息失败（{event.group.id}），已放弃: {str(err)}")
         return
@@ -153,8 +153,8 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         return
     finally:
         busy_group.remove(event.sender.group.id)
-    message = [At(event.sender), Plain(' ' + reply.msg)]
-    message = instance.middlewares.execute(message)
+    message = [At(event.sender), Plain(' ' + reply)]
+    message = await instance.middlewares.execute(message)
     try:
         await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
     except Exception as err:

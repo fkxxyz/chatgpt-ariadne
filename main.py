@@ -19,6 +19,7 @@ from graia.saya import Saya
 import common
 import middleware.sensitive_replace
 import middleware.latex2text
+import middleware.text2image
 import utils.sensitive
 from admin.index import Admin
 from app import instance
@@ -43,6 +44,7 @@ def main():
     instance.middlewares = common.MiddleWaresExecutor([
         middleware.latex2text.Latex2TextMiddleware(),
         middleware.sensitive_replace.SensitiveReplaceMiddleware(),
+        middleware.text2image.Text2ImageMiddleware(),
     ])
 
     # 读取配置文件

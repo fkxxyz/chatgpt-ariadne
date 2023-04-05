@@ -21,8 +21,11 @@ class Latex2TextMiddleware(MessageMiddleware):
     def __init__(self):
         self.replace: Callable[[str], str] = Latex2Text().replace
 
-    def do(self, message: List[Element]) -> List[Element]:
+    async def do(self, message: List[Element]) -> List[Element]:
         for i in range(len(message)):
             if isinstance(message[i], Plain):
-                message[i] = Plain(self.replace(str(message[i])))
+                text = str(message[i])
+                if len(text) >= 192:
+                    continue
+                message[i] = Plain(self.replace(text))
         return message

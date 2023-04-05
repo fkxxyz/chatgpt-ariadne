@@ -7,7 +7,7 @@ from middleware import MessageMiddleware
 
 
 class SensitiveReplaceMiddleware(MessageMiddleware):
-    def do(self, message: List[Element]) -> List[Element]:
+    async def do(self, message: List[Element]) -> List[Element]:
         for i in range(len(message)):
             if isinstance(message[i], Plain):
                 replaced, text = instance.sensitive.filter_1(str(message[i]))

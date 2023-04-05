@@ -17,7 +17,7 @@ class MiddleWaresExecutor:
     def __init__(self, middlewares: List[MessageMiddleware]):
         self.middlewares: List[MessageMiddleware] = middlewares
 
-    def execute(self, message: MessageChain) -> MessageChain:
+    async def execute(self, message: MessageChain) -> MessageChain:
         for middleware in self.middlewares:
-            message = middleware.do(message)
+            message = await middleware.do(message)
         return message

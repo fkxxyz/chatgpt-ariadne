@@ -43,12 +43,12 @@ async def on_session_group_create(app: Ariadne, group_id: int) -> str:
 
     # 发送 chati 的回复给群组
     try:
-        await utils.message.send_group_message(app, group, resp.msg)
+        await utils.message.send_group_message(app, group, resp)
     except Exception as err:
         await utils.message.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
-        return resp.msg
+        return resp
 
-    return resp.msg
+    return resp
 
 
 async def on_session_group_inherit(app: Ariadne, group_id: int, memo: str, history: str) -> None:
@@ -96,12 +96,12 @@ async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
 
     # 发送 chati 的回复给群组
     try:
-        await utils.message.send_group_message(app, group, resp.msg)
+        await utils.message.send_group_message(app, group, resp)
     except Exception as err:
         await utils.message.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
-        return resp.msg
+        return resp
 
-    return resp.msg
+    return resp
 
 
 async def on_group_welcome_prompt(app: Ariadne, group_id: int, prompt: str):
