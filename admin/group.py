@@ -1,4 +1,6 @@
+from graia.amnesia.message import MessageChain
 from graia.ariadne import Ariadne
+from graia.ariadne.message.element import Plain
 from graia.ariadne.model import Group, GroupConfig
 
 import utils.message
@@ -95,8 +97,10 @@ async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
     resp = await utils.chati.send_to_chati(msg, session_id)
 
     # 发送 chati 的回复给群组
+    message = [Plain(' ' + resp)]
+    message = await instance.middlewares.execute(message)
     try:
-        await utils.message.send_group_message(app, group, resp)
+        await utils.message.send_group_message(app, group, MessageChain(message))
     except Exception as err:
         await utils.message.send_to_master(app, f"发送群组消息失败（{group.id}），已放弃: {str(err)}")
         return resp
