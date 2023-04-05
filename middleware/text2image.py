@@ -58,13 +58,14 @@ def html2image(html_str: str) -> bytes:
     temp_png = tempfile.NamedTemporaryFile(suffix='.png', delete=True)
     imgkit.from_string(html_str, temp_png.name, options={
         'format': 'png',
-        'width': 360,
+        'width': 720,
     })
     image = PIL.Image.open(temp_png.file)
 
     # 将 png 图片优化
     buffered = BytesIO()
-    image.save(buffered, format="PNG", optimize=True)
+    image2 = image.convert("P", palette=PIL.Image.ADAPTIVE, colors=10)
+    image2.save(buffered, format="PNG", optimize=True)
     del temp_png
 
     return buffered.getvalue()
@@ -102,7 +103,7 @@ body {{
     padding-bottom: 10px;
     background-color: #e8fbf1;
     padding: 30px;
-    color: #516272
+    color: #516272;
 }}
 </style>
 </head>
