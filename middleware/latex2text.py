@@ -10,7 +10,7 @@ class Latex2Text:
     def __init__(self):
         from pylatexenc.latex2text import LatexNodes2Text
         self.latex_to_text = LatexNodes2Text().latex_to_text
-        self.regex = re.compile(r'\$\$\n?(\\?[a-zA-Z0-9_]+.*)\$\$|\$(\\?[a-zA-Z0-9_]+.*)\$')
+        self.regex = re.compile(r'\$\$\n?(\\?[a-zA-Z0-9_]+.*)\n?\$\$|\$(\\?[a-zA-Z0-9_]+.*)\$')
 
     def replace(self, text: str) -> str:
         # 用 latex_to_text 函数替换所有匹配到的公式
