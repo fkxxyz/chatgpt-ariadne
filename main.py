@@ -43,8 +43,8 @@ def main():
     instance.sensitive = utils.sensitive.SensitiveFilter(config_.sensitive1, config_.sensitive2)
     instance.middlewares = common.MiddleWaresExecutor([
         middleware.latex2text.Latex2TextMiddleware(),
-        middleware.sensitive_replace.SensitiveReplaceMiddleware(),
         middleware.text2image.Text2ImageMiddleware(),
+        middleware.sensitive_replace.SensitiveReplaceMiddleware(),
     ])
 
     # 读取配置文件

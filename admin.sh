@@ -9,6 +9,17 @@ if [ "$BASIC_AUTH" ]; then
   EXTRA_CURL_ARGS+=("--user" "$BASIC_AUTH")
 fi
 
+cmd_test() {
+  local result_str exit_code=0
+  result_str="$(
+    curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
+      -X PUT --data-binary @- \
+      "$ARIADNE_ADMIN/api/test"
+  )" || exit_code="$?"
+  echo "$result_str"
+  return "$exit_code"
+}
+
 cmd_fcreate() {
   local user_id="$1"
   local comment="$2"
@@ -191,6 +202,8 @@ cmd_help(){
   printf 'Usage: %s COMMAND
 
 Commands:
+  test < <stdin>
+
   fcreate <user_id> [<comment>] [<source>]
   finherit <user_id> <memo> <history>
   fsend <user_id> <message>

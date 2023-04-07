@@ -15,6 +15,7 @@ from markdown.extensions.codehilite import CodeHiliteExtension
 from markdown.extensions.tables import TableExtension
 from mdx_math import MathExtension
 
+from app import instance
 from middleware import MessageMiddleware
 
 
@@ -85,6 +86,9 @@ async def text2image(text: str) -> bytes:
     ]
     md = markdown.Markdown(extensions=extensions)
     html_content_str = md.convert(text)
+
+    # 将 html 中的敏感词替换
+    replaced, html_content_str = instance.sensitive.filter_1(html_content_str)
 
     # 将得到的二维码转换成 base64
     qrcode_data = await cor_text2qrcode

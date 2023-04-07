@@ -6,6 +6,7 @@ from graia.ariadne.util.async_exec import io_bound
 
 from admin.friend import *
 from admin.group import *
+from admin.test import on_master_test
 from common import friend_chati_session_id
 
 
@@ -79,6 +80,12 @@ class Admin:
         if err is not None:
             raise err
         return result
+
+    def master_test(self, text: str) -> None:
+        return self.__await_request(
+            'master_test',
+            on_master_test, text,
+        )
 
     def session_friend_create(self, user_id: int, comment: str, source: str) -> str:
         return self.__await_request(
