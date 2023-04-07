@@ -53,7 +53,7 @@ def call_until_success(fn: Callable[[], requests.Response]) -> bytes:
             continue
         if resp.status_code != http.HTTPStatus.OK:
             logger.info(f"响应返回错误 {resp.status_code} ，终止： {resp.content.decode()}")
-            raise RuntimeError(f"响应返回错误 {resp.status_code}： {resp.content.decode()}")
+            resp.raise_for_status()
 
         return resp.content
 

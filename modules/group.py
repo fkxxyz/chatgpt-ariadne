@@ -1,3 +1,6 @@
+import http
+
+import requests
 from graia.amnesia.message import MessageChain
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import GroupMessage
@@ -58,11 +61,11 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
     )
     try:
         instance.chati.delete(session_id)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         pass
     try:
         reply = await utils.chati.create_session_group_chati(session_id, group_info)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         await master_cor
         await utils.message.send_to_master(app, f"创建群组会话（{event.group.id}）失败： {e}")
         return
@@ -98,14 +101,14 @@ async def group_member_join_listener(app: Ariadne, event: MemberJoinEvent):
     session_id = group_chati_session_id(app.account, event.member.group.id)
     try:
         session_info = instance.chati.info(session_id)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         return
     group_info = GroupInfo(**session_info["params"])
     profile = await event.member.get_profile()
     welcome_prompt = generate_welcome_prompt(group_info, event.member, profile)
     try:
         reply = instance.chati.send_once(welcome_prompt)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         await utils.message.send_to_master(app, f"发送欢迎新人提示消息（{event.member.group.id}）给 AI 失败： {str(e)}")
         return
     message_chain = MessageChain([At(event.member), ' ' + reply])
@@ -135,7 +138,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
 
     try:
         instance.chati.info(session_id)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         return
 
     if event.sender.group.id in busy_group:
@@ -146,10 +149,18 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     busy_group.add(event.sender.group.id)
     try:
         reply = await utils.chati.send_to_chati(msg, session_id)
-    except RuntimeError as e:
-        await utils.message.send_to_master(app, f"发送群组消息（{event.sender.group.id}）给 AI 失败： {str(e)}")
-        await utils.message.send_group_message(app, event.sender.group,
-                                               MessageChain([At(event.sender), f' 抱歉，我服务器似乎出了点问题： {str(e)}']))
+    except requests.HTTPError as e:
+        if e.response.status_code == http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
+            await utils.message.send_group_message(
+                app, event.sender.group,
+                MessageChain([At(event.sender), Plain(f'抱歉，消息太长啦，我无法接收')])
+            )
+        else:
+            err_str = f"发送群组消息（{event.sender.id}）给 AI 失败： {str(e)} - {e.response.content.decode()}"
+            await utils.message.send_to_master(app, err_str)
+            err_str = f'抱歉，我服务器似乎出了点问题： 响应返回错误 {e.response.status_code}： {e.response.content.decode()}'
+            await utils.message.send_group_message(
+                app, event.sender.group, MessageChain([At(event.sender), Plain(err_str)]))
         return
     finally:
         busy_group.remove(event.sender.group.id)

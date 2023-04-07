@@ -1,5 +1,7 @@
+import http
 import time
 
+import requests
 from graia.amnesia.message import MessageChain
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import FriendMessage
@@ -45,11 +47,11 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
     )
     try:
         instance.chati.delete(session_id)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         pass
     try:
         reply = await utils.chati.create_session_friend_chati(session_id, user_info)
-    except RuntimeError as e:
+    except requests.HTTPError as e:
         await master_cor
         await utils.message.send_to_master(app, f"创建好友会话（{event.supplicant}）失败： {e}")
         return
@@ -81,15 +83,23 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     session_id = friend_chati_session_id(app.account, event.sender.id)
 
     if session_id in busy_friend:
-        await utils.message.send_friend_message(app, event.sender, MessageChain([Plain("消息太快啦，稍等一下吧")]))
+        await utils.message.send_friend_message(app, event.sender, MessageChain([Plain("我还在思考中，请稍等...")]))
         return
 
     busy_friend.add(session_id)
     try:
         reply = await utils.chati.send_to_chati(event.message_chain.display, session_id)
-    except RuntimeError as e:
-        await utils.message.send_to_master(app, f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)}")
-        await utils.message.send_friend_message(app, event.sender, MessageChain([Plain(f'抱歉，我服务器似乎出了点问题： {str(e)}')]))
+    except requests.HTTPError as e:
+        if e.response.status_code == http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
+            await utils.message.send_friend_message(
+                app, event.sender,
+                MessageChain([Plain(f'抱歉，消息太长啦，我无法接收')])
+            )
+        else:
+            err_str = f"发送好友消息（{event.sender.id}）给 AI 失败： {str(e)} - {e.response.content.decode()}"
+            await utils.message.send_to_master(app, err_str)
+            err_str = f'抱歉，我服务器似乎出了点问题： 响应返回错误 {e.response.status_code}： {e.response.content.decode()}'
+            await utils.message.send_friend_message(app, event.sender, MessageChain([Plain(err_str)]))
         return
     finally:
         busy_friend.remove(session_id)

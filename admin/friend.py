@@ -1,3 +1,4 @@
+import requests
 from graia.amnesia.message import MessageChain
 from graia.ariadne import Ariadne
 from graia.ariadne.message.element import Plain
@@ -27,7 +28,7 @@ async def on_session_friend_create(app: Ariadne, user_id: int, comment: str, sou
     session_id = friend_chati_session_id(app.account, user_id)
     try:
         instance.chati.delete(session_id)
-    except RuntimeError:
+    except requests.HTTPError:
         pass
 
     # 创建 chati 会话
@@ -71,7 +72,7 @@ async def on_session_friend_inherit(app: Ariadne, user_id: int, memo: str, histo
     session_id = friend_chati_session_id(app.account, user_id)
     try:
         instance.chati.delete(session_id)
-    except RuntimeError:
+    except requests.HTTPError:
         pass
 
     # 继承 chati 会话
