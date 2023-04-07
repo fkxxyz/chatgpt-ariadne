@@ -46,7 +46,7 @@ def call_until_success(fn: Callable[[], requests.Response]) -> bytes:
             logger.info(f"等待 10 秒后重试 ...")
             time.sleep(10)
             continue
-        if int(resp.status_code / 100) == 5:
+        if int(resp.status_code / 100) == 5 or resp.status_code == http.HTTPStatus.NOT_ACCEPTABLE:
             logger.info(f"响应返回错误 {resp.status_code}： {resp.content.decode()}")
             logger.info(f"等待 10 秒后重试 ...")
             time.sleep(10)
