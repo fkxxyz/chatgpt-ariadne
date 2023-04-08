@@ -13,6 +13,7 @@ from common import friend_chati_session_id
 @dataclass
 class AdminRequest:
     seq: int
+    account: int
     callable: Callable
     args: tuple = tuple()
     kwargs: dict = None
@@ -23,8 +24,7 @@ class AdminRequest:
 
 
 class Admin:
-    def __init__(self, self_id: int):
-        self.__self_id = self_id
+    def __init__(self):
         self.__q: Dict[str, AdminRequest] = {}
         self.__lock = threading.Lock()
         self.__cond = threading.Condition(self.__lock)
@@ -59,14 +59,14 @@ class Admin:
                 if self.__terminated:
                     raise error.TerminatedError
 
-    def __await_request(self, session_id: str, callable_: Callable, *args, **kwargs) -> Any:
+    def __await_request(self, account: int, session_id: str, callable_: Callable, *args, **kwargs) -> Any:
         with self.__lock:
             while session_id in self.__q:
                 self.__cond.wait()
                 if self.__terminated:
                     raise error.TerminatedError
             self.__seq += 1
-            self.__q[session_id] = AdminRequest(self.__seq, callable_, args, kwargs)
+            self.__q[session_id] = AdminRequest(self.__seq, account, callable_, args, kwargs)
             self.__cond.notify_all()
 
             while self.__q[session_id].replied is False:
@@ -81,50 +81,50 @@ class Admin:
             raise err
         return result
 
-    def master_test(self, text: str) -> None:
+    def master_test(self, account: int, text: str) -> None:
         return self.__await_request(
-            'master_test',
+            account, 'master_test',
             on_master_test, text,
         )
 
-    def session_friend_create(self, user_id: int, comment: str, source: str) -> str:
+    def session_friend_create(self, account: int, user_id: int, comment: str, source: str) -> str:
         return self.__await_request(
-            friend_chati_session_id(self.__self_id, user_id),
+            account, friend_chati_session_id(account, user_id),
             on_session_friend_create, user_id, comment, source,
         )
 
-    def session_friend_inherit(self, user_id: int, memo: str, history: str) -> None:
+    def session_friend_inherit(self, account: int, user_id: int, memo: str, history: str) -> None:
         return self.__await_request(
-            friend_chati_session_id(self.__self_id, user_id),
+            account, friend_chati_session_id(account, user_id),
             on_session_friend_inherit, user_id, memo, history,
         )
 
-    def session_friend_send(self, user_id: int, msg: str) -> str:
+    def session_friend_send(self, account: int, user_id: int, msg: str) -> str:
         return self.__await_request(
-            friend_chati_session_id(self.__self_id, user_id),
+            account, friend_chati_session_id(account, user_id),
             on_session_friend_send, user_id, msg,
         )
 
-    def session_group_create(self, group_id: int) -> str:
+    def session_group_create(self, account: int, group_id: int) -> str:
         return self.__await_request(
-            group_chati_session_id(self.__self_id, group_id),
+            account, group_chati_session_id(account, group_id),
             on_session_group_create, group_id,
         )
 
-    def session_group_inherit(self, group_id: int, memo: str, history: str) -> None:
+    def session_group_inherit(self, account: int, group_id: int, memo: str, history: str) -> None:
         return self.__await_request(
-            group_chati_session_id(self.__self_id, group_id),
+            account, group_chati_session_id(account, group_id),
             on_session_group_inherit, group_id, memo, history,
         )
 
-    def session_group_send(self, group_id: int, msg: str) -> str:
+    def session_group_send(self, account: int, group_id: int, msg: str) -> str:
         return self.__await_request(
-            group_chati_session_id(self.__self_id, group_id),
+            account, group_chati_session_id(account, group_id),
             on_session_group_send, group_id, msg,
         )
 
-    def group_welcome_prompt(self, group_id: int, prompt: str):
+    def group_welcome_prompt(self, account: int, group_id: int, prompt: str):
         return self.__await_request(
-            group_chati_session_id(self.__self_id, group_id),
+            account, group_chati_session_id(account, group_id),
             on_group_welcome_prompt, group_id, prompt,
         )

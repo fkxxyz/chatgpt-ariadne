@@ -3,6 +3,8 @@
 import argparse
 import json
 import pkgutil
+import threading
+from typing import List
 
 from creart import create
 from graia.ariadne.app import Ariadne
@@ -33,8 +35,8 @@ def main():
     parser.add_argument('--config', '-c', type=str, help='config json file', default=".test.config.json")
     args = parser.parse_args()
 
-    with open(args.config, "r") as f:
-        config_ = Config(**json.load(f))
+    # 读取配置文件
+    config_ = Config.load(args.config)
 
     # 初始化全局对象
     chati = ChatI(config_.chati)
@@ -47,20 +49,19 @@ def main():
         middleware.sensitive_replace.SensitiveReplaceMiddleware(),
     ])
 
-    # 读取配置文件
-    connection = config(
-        config_.account,
-        config_.verify_key,
-        HttpClientConfig(host=config_.http),
-        WebsocketClientConfig(host=config_.websocket),
-    )
-
+    # 初始化 ariadne 对象
     bcc = create(Broadcast)
     saya = create(Saya)
-    app = Ariadne(connection)
-    instance.app = app
+    Ariadne.config(default_account=config_.accounts[0].account)
+    for account_config in config_.accounts:
+        instance.app[account_config.account] = Ariadne(connection=config(
+            account_config.account,
+            config_.verify_key,
+            HttpClientConfig(host=config_.http),
+            WebsocketClientConfig(host=config_.websocket),
+        ))
     instance.app_server = app_server
-    instance.admin = Admin(config_.account)
+    instance.admin = Admin()
 
     con = Console(broadcast=bcc, prompt="EroEroBot> ")
     saya.install_behaviours(ConsoleBehaviour(con))
@@ -73,7 +74,22 @@ def main():
                 continue
             saya.require(f"modules.{module_info.name}")
 
+    # 启动服务线程
+    from waitress.server import create_server
+    serv = create_server(
+        app_server,
+        host=config_.listen,
+        port=config_.port,
+        threads=256,
+    )
+    serv_thread = threading.Thread(target=serv.run)
+    serv_thread.start()
+
+    # 启动 Ariadne 应用程序
     Ariadne.launch_blocking()
+
+    serv.close()
+    serv_thread.join()
 
 
 if __name__ == "__main__":

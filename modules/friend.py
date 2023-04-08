@@ -6,7 +6,7 @@ from graia.amnesia.message import MessageChain
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import FriendMessage
 from graia.ariadne.event.mirai import NewFriendRequestEvent
-from graia.ariadne.message.element import Plain, Image
+from graia.ariadne.message.element import Plain
 
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema

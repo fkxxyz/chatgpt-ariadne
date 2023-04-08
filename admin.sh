@@ -3,6 +3,7 @@ set -e
 
 ARIADNE_ADMIN="${ARIADNE_ADMIN:-http://127.0.0.1:5577}"
 BASIC_AUTH="${BASIC_AUTH:-}"
+ACCOUNT="${ACCOUNT:-}"
 
 EXTRA_CURL_ARGS=()
 if [ "$BASIC_AUTH" ]; then
@@ -14,7 +15,7 @@ cmd_test() {
   result_str="$(
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -X PUT --data-binary @- \
-      "$ARIADNE_ADMIN/api/test"
+      "$ARIADNE_ADMIN/api/test?account=${ACCOUNT}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -30,7 +31,7 @@ cmd_fcreate() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X PUT --data-binary "$data" \
-      "$ARIADNE_ADMIN/api/friend/create?user_id=${user_id}"
+      "$ARIADNE_ADMIN/api/friend/create?account=${ACCOUNT}&user_id=${user_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -46,7 +47,7 @@ cmd_finherit() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X PUT --data-binary "$data" \
-      "$ARIADNE_ADMIN/api/friend/inherit?user_id=${user_id}"
+      "$ARIADNE_ADMIN/api/friend/inherit?account=${ACCOUNT}&user_id=${user_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -61,7 +62,7 @@ cmd_fsend() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X POST --data-binary "$data" \
-      "$ARIADNE_ADMIN/api/friend/send?user_id=${user_id}"
+      "$ARIADNE_ADMIN/api/friend/send?account=${ACCOUNT}&user_id=${user_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -74,7 +75,7 @@ cmd_gcreate() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X PUT --data-binary "{}" \
-      "$ARIADNE_ADMIN/api/group/create?group_id=${group_id}"
+      "$ARIADNE_ADMIN/api/group/create?account=${ACCOUNT}&group_id=${group_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -90,7 +91,7 @@ cmd_ginherit() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X PUT --data-binary "$data" \
-      "$ARIADNE_ADMIN/api/group/inherit?group_id=${group_id}"
+      "$ARIADNE_ADMIN/api/group/inherit?account=${ACCOUNT}&group_id=${group_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -105,7 +106,7 @@ cmd_gsend() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X POST --data-binary "$data" \
-      "$ARIADNE_ADMIN/api/group/send?group_id=${group_id}"
+      "$ARIADNE_ADMIN/api/group/send?account=${ACCOUNT}&group_id=${group_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"
@@ -120,7 +121,7 @@ cmd_gwelcome() {
     curl "${EXTRA_CURL_ARGS[@]}" --fail-with-body -s \
       -H "Content-Type: application/json" \
       -X PUT --data-binary "$data" \
-      "$ARIADNE_ADMIN/api/group/welcome?group_id=${group_id}"
+      "$ARIADNE_ADMIN/api/group/welcome?account=${ACCOUNT}&group_id=${group_id}"
   )" || exit_code="$?"
   echo "$result_str"
   return "$exit_code"

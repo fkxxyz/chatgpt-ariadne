@@ -9,6 +9,7 @@ from server import app
 
 @app.route('/api/group/create', methods=['PUT'])
 def handle_group_create():
+    account = flask.request.args.get('account', type=int)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -18,7 +19,7 @@ def handle_group_create():
         return flask.make_response('error: group_id must be int', http.HTTPStatus.BAD_REQUEST)
 
     try:
-        reply = instance.admin.session_group_create(group_id)
+        reply = instance.admin.session_group_create(account, group_id)
     except error.AdminError as e:
         return flask.make_response(str(e), e.HttpStatus)
     except Exception as e:
@@ -29,6 +30,7 @@ def handle_group_create():
 
 @app.route('/api/group/inherit', methods=['PUT'])
 def handle_group_inherit():
+    account = flask.request.args.get('account', type=int)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -45,7 +47,7 @@ def handle_group_inherit():
         return flask.make_response('error: missing history in json', http.HTTPStatus.BAD_REQUEST)
 
     try:
-        instance.admin.session_group_inherit(group_id, memo, history)
+        instance.admin.session_group_inherit(account, group_id, memo, history)
     except error.AdminError as e:
         return flask.make_response(str(e), e.HttpStatus)
     except Exception as e:
@@ -56,6 +58,7 @@ def handle_group_inherit():
 
 @app.route('/api/group/send', methods=['POST'])
 def handle_group_send():
+    account = flask.request.args.get('account', type=int)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -69,7 +72,7 @@ def handle_group_send():
         return flask.make_response('error: missing message in json', http.HTTPStatus.BAD_REQUEST)
 
     try:
-        reply = instance.admin.session_group_send(group_id, message)
+        reply = instance.admin.session_group_send(account, group_id, message)
     except error.AdminError as e:
         return flask.make_response(str(e), e.HttpStatus)
     except Exception as e:
@@ -80,6 +83,7 @@ def handle_group_send():
 
 @app.route('/api/group/welcome', methods=['PUT'])
 def handle_group_welcome():
+    account = flask.request.args.get('account', type=int)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -93,7 +97,7 @@ def handle_group_welcome():
         return flask.make_response('error: missing prompt in json', http.HTTPStatus.BAD_REQUEST)
 
     try:
-        instance.admin.group_welcome_prompt(group_id, prompt)
+        instance.admin.group_welcome_prompt(account, group_id, prompt)
     except error.AdminError as e:
         return flask.make_response(str(e), e.HttpStatus)
     except Exception as e:

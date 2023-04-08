@@ -1,6 +1,3 @@
-import json
-from dataclasses import dataclass
-
 from graia.ariadne.app import Ariadne
 from graia.ariadne.connection.config import (
     HttpClientConfig,
@@ -10,15 +7,15 @@ from graia.ariadne.connection.config import (
 
 from config import Config
 
-with open(".test.config.json", "r") as f:
-    config_ = Config(**json.load(f))
+config_ = Config.load(".test.config.json")
 
-# 读取配置文件
-connection = config(
-    config_.account,
-    config_.verify_key,
-    HttpClientConfig(host=config_.http),
-    WebsocketClientConfig(host=config_.websocket),
-)
-
-app = Ariadne(connection)
+Ariadne.config(default_account=config_.accounts[0].account)
+for account_config in config_.accounts:
+    Ariadne.connection = config(
+        account_config.account,
+        config_.verify_key,
+        HttpClientConfig(host=config_.http),
+        WebsocketClientConfig(host=config_.websocket),
+    )
+    Ariadne.launch_blocking()
+Ariadne.launch_blocking()
