@@ -143,12 +143,12 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     except requests.HTTPError as e:
         return
 
-    if event.sender.group.id in busy_group:
+    if session_id in busy_group:
         await utils.message.send_group_message(app, event.sender.group,
                                                MessageChain([At(event.sender), Plain(" 我还在思考中，请稍等...")]))
         return
 
-    busy_group.add(event.sender.group.id)
+    busy_group.add(session_id)
     try:
         reply = await utils.chati.send_to_chati(msg, session_id)
     except requests.HTTPError as e:
@@ -165,7 +165,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
                 app, event.sender.group, MessageChain([At(event.sender), Plain(err_str)]))
         return
     finally:
-        busy_group.remove(event.sender.group.id)
+        busy_group.remove(session_id)
     message = [At(event.sender), Plain(' ' + reply)]
     message = await instance.middlewares.execute(message)
     try:
