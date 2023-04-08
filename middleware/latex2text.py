@@ -25,7 +25,7 @@ class Latex2TextMiddleware(MessageMiddleware):
         for i in range(len(message)):
             if isinstance(message[i], Plain):
                 text = str(message[i])
-                if len(text) >= 192:
-                    continue
+                # if len(text) >= 192:
+                #     continue
                 message[i] = Plain(self.replace(text))
         return message
