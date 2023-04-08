@@ -145,7 +145,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
 
     if event.sender.group.id in busy_group:
         await utils.message.send_group_message(app, event.sender.group,
-                                               MessageChain([Plain("我还在思考中，请稍等...")]))
+                                               MessageChain([At(event.sender), Plain(" 我还在思考中，请稍等...")]))
         return
 
     busy_group.add(event.sender.group.id)
