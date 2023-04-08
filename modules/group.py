@@ -155,7 +155,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         if e.response.status_code == http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
             await utils.message.send_group_message(
                 app, event.sender.group,
-                MessageChain([At(event.sender), Plain(f'抱歉，消息太长啦，我无法接收')])
+                MessageChain([At(event.sender), Plain(f' 抱歉，消息太长啦，我无法接收')])
             )
         else:
             err_str = f"发送群组消息（{event.sender.id}）给 AI 失败： {str(e)} - {e.response.content.decode()}"
