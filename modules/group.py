@@ -133,6 +133,8 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         msg = event.message_chain.exclude(At).display
     else:
         msg = msg[4:]
+    if len(msg) == 0:
+        msg = " "
 
     session_id = group_chati_session_id(app.account, event.sender.group.id)
 
@@ -143,7 +145,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
 
     if event.sender.group.id in busy_group:
         await utils.message.send_group_message(app, event.sender.group,
-                                               MessageChain([At(event.sender), ' 消息太快啦，稍等一下吧']))
+                                               MessageChain([Plain("我还在思考中，请稍等...")]))
         return
 
     busy_group.add(event.sender.group.id)
