@@ -54,7 +54,7 @@ def main():
     saya = create(Saya)
     Ariadne.config(default_account=config_.accounts[0].account)
     for account_config in config_.accounts:
-        instance.app[account_config.account] = Ariadne(connection=config(
+        Ariadne(connection=config(
             account_config.account,
             config_.verify_key,
             HttpClientConfig(host=config_.http),

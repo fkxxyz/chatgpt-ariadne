@@ -104,7 +104,7 @@ async def group_member_join_listener(app: Ariadne, event: MemberJoinEvent):
     except requests.HTTPError as e:
         return
     group_info = GroupInfo(**session_info["params"])
-    profile = await event.member.get_profile()
+    profile = await app.get_member_profile(event.member)
     welcome_prompt = generate_welcome_prompt(group_info, event.member, profile)
     try:
         reply = instance.chati.send_once(welcome_prompt)

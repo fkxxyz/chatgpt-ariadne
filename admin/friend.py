@@ -19,7 +19,7 @@ async def on_session_friend_create(app: Ariadne, user_id: int, comment: str, sou
         raise error.FriendNotFoundError(f"好友 {user_id} 不存在")
 
     # 获取好友信息
-    friend_profile: "Profile" = await friend.get_profile()
+    friend_profile: "Profile" = await app.get_friend_profile(friend)
 
     # 获取自己的信息
     profile = await app.get_bot_profile()
@@ -63,7 +63,7 @@ async def on_session_friend_inherit(app: Ariadne, user_id: int, memo: str, histo
         raise error.FriendNotFoundError(f"好友 {user_id} 不存在")
 
     # 获取好友信息
-    friend_profile: "Profile" = await friend.get_profile()
+    friend_profile: "Profile" = await app.get_friend_profile(friend)
 
     # 获取自己的信息
     profile = await app.get_bot_profile()

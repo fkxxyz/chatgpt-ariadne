@@ -21,9 +21,9 @@ serv: MultiSocketServer | None = None
 async def start_admin_server():
     while True:
         session_id, request = await instance.admin.get_request()
-        logger.info(f"收到请求（{request.seq}）: {session_id}")
+        logger.info(f"收到请求（{request.seq}）: {request.callable.__name__} {session_id}")
         try:
-            app_ = instance.app.get(request.account)
+            app_ = Ariadne.current(request.account)
             if app_ is None:
                 raise FriendNotFoundError(f"帐号不存在： {request.account}")
             if request.kwargs is None:

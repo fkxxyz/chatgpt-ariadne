@@ -19,7 +19,7 @@ async def on_session_group_create(app: Ariadne, group_id: int) -> str:
         raise error.FriendNotFoundError(f"群组 {group_id} 不存在")
 
     # 获取群组信息
-    group_config: GroupConfig = await group.get_config()
+    group_config: GroupConfig = await app.get_group_config(group)
 
     # 获取自己的信息
     profile = await app.get_bot_profile()
@@ -61,7 +61,7 @@ async def on_session_group_inherit(app: Ariadne, group_id: int, memo: str, histo
         raise error.FriendNotFoundError(f"群组 {group_id} 不存在")
 
     # 获取群组信息
-    group_config: GroupConfig = await group.get_config()
+    group_config: GroupConfig = await app.get_group_config(group)
 
     # 获取自己的信息
     profile = await app.get_bot_profile()
