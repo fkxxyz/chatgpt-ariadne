@@ -1,3 +1,4 @@
+import traceback
 from asyncio import Task
 from typing import Optional
 
@@ -33,6 +34,7 @@ async def start_admin_server():
         except TerminatedError:
             break
         except Exception as err:
+            traceback.print_exc()
             logger.info(f"处理请求（{request.seq}）出错: {session_id}")
             instance.admin.set_result(session_id, None, err)
 
