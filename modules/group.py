@@ -21,7 +21,7 @@ channel = Channel.current()
 
 @channel.use(ListenerSchema(listening_events=[BotInvitedJoinGroupRequestEvent]))
 async def group_invite_listener(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
-    if event.supplicant in instance.config.masters:
+    if event.supplicant in instance.config.accounts[app.account].masters:
         await event.accept()
     else:
         await event.reject()
@@ -32,7 +32,7 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
     # 如果该群没有任何 master 成员群聊，则退群
     members = await app.get_member_list(event.group)
     members_set = {member.id for member in members}
-    for master in instance.config.masters:
+    for master in instance.config.accounts[app.account].masters:
         if master in members_set:
             break
     else:
