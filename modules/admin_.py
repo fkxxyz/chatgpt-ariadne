@@ -7,8 +7,7 @@ from graia.saya import Channel
 from loguru import logger
 from waitress.server import MultiSocketServer
 
-import error
-from admin.error import TerminatedError
+from admin.error import TerminatedError, FriendNotFoundError
 from app import instance
 
 channel = Channel.current()
@@ -25,7 +24,7 @@ async def start_admin_server():
         try:
             app_ = instance.app.get(request.account)
             if app_ is None:
-                raise error.NotFoundError(f"帐号不存在： {request.account}")
+                raise FriendNotFoundError(f"帐号不存在： {request.account}")
             if request.kwargs is None:
                 result = await request.callable(app_, *request.args)
             else:
