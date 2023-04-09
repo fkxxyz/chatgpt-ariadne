@@ -10,6 +10,8 @@ from server import app
 @app.route('/api/group/create', methods=['PUT'])
 def handle_group_create():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -31,6 +33,8 @@ def handle_group_create():
 @app.route('/api/group/inherit', methods=['PUT'])
 def handle_group_inherit():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -59,6 +63,8 @@ def handle_group_inherit():
 @app.route('/api/group/send', methods=['POST'])
 def handle_group_send():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)
@@ -84,6 +90,8 @@ def handle_group_send():
 @app.route('/api/group/welcome', methods=['PUT'])
 def handle_group_welcome():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     group_id = flask.request.args.get('group_id')
     if group_id is None or len(group_id) == 0:
         return flask.make_response('error: missing group_id query', http.HTTPStatus.BAD_REQUEST)

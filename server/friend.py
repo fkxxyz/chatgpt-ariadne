@@ -10,6 +10,8 @@ from server import app
 @app.route('/api/friend/create', methods=['PUT'])
 def handle_friend_create():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     user_id = flask.request.args.get('user_id')
     if user_id is None or len(user_id) == 0:
         return flask.make_response('error: missing user_id query', http.HTTPStatus.BAD_REQUEST)
@@ -34,6 +36,8 @@ def handle_friend_create():
 @app.route('/api/friend/inherit', methods=['PUT'])
 def handle_friend_inherit():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     user_id = flask.request.args.get('user_id')
     if user_id is None or len(user_id) == 0:
         return flask.make_response('error: missing user_id query', http.HTTPStatus.BAD_REQUEST)
@@ -62,6 +66,8 @@ def handle_friend_inherit():
 @app.route('/api/friend/send', methods=['POST'])
 def handle_friend_send():
     account = flask.request.args.get('account', type=int)
+    if account is None:
+        return flask.make_response('error: missing account query', http.HTTPStatus.BAD_REQUEST)
     user_id = flask.request.args.get('user_id')
     if user_id is None or len(user_id) == 0:
         return flask.make_response('error: missing user_id query', http.HTTPStatus.BAD_REQUEST)
