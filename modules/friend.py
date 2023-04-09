@@ -50,7 +50,8 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
     except requests.HTTPError as e:
         pass
     try:
-        reply = await utils.chati.create_session_friend_chati(session_id, user_info)
+        type_ = instance.config.accounts_map[app.account].friend_type
+        reply = await utils.chati.create_session_friend_chati(session_id, type_, user_info)
     except requests.HTTPError as e:
         await master_cor
         await utils.message.send_to_master(app, f"创建好友会话（{event.supplicant}）失败： {e}")
@@ -104,7 +105,8 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
     finally:
         busy_friend.remove(session_id)
     message = [Plain(reply)]
-    message = await instance.middlewares.execute(message)
+    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message = await instance.middlewares.execute(message, exclude_set)
     try:
         await utils.message.send_friend_message(app, event.sender, MessageChain(message))
     except Exception as err:

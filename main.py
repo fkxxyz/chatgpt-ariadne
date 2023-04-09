@@ -43,11 +43,7 @@ def main():
     instance.chati = chati
     instance.config = config_
     instance.sensitive = utils.sensitive.SensitiveFilter(config_.sensitive1, config_.sensitive2)
-    instance.middlewares = common.MiddleWaresExecutor([
-        middleware.latex2text.Latex2TextMiddleware(),
-        middleware.text2image.Text2ImageMiddleware(),
-        middleware.sensitive_replace.SensitiveReplaceMiddleware(),
-    ])
+    instance.middlewares = common.MiddleWaresExecutor()
 
     # 初始化 ariadne 对象
     bcc = create(Broadcast)

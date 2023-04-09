@@ -64,7 +64,8 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
     except requests.HTTPError as e:
         pass
     try:
-        reply = await utils.chati.create_session_group_chati(session_id, group_info)
+        type_ = instance.config.accounts_map[app.account].group_type
+        reply = await utils.chati.create_session_group_chati(session_id, type_, group_info)
     except requests.HTTPError as e:
         await master_cor
         await utils.message.send_to_master(app, f"创建群组会话（{event.group.id}）失败： {e}")
@@ -167,7 +168,8 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     finally:
         busy_group.remove(session_id)
     message = [At(event.sender), Plain(' ' + reply)]
-    message = await instance.middlewares.execute(message)
+    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message = await instance.middlewares.execute(message, exclude_set)
     try:
         await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
     except Exception as err:

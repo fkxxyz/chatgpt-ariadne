@@ -134,18 +134,18 @@ class ChatI:
                 return resp
             time.sleep(0.5)
 
-    def create_friend(self, id_: str, user_info: UserInfo) -> ChatISessionInfo:
+    def create_friend(self, id_: str, type_: str, user_info: UserInfo) -> ChatISessionInfo:
         params = asdict(user_info)
-        return self.create(id_, "qq-friend", params)
+        return self.create(id_, type_, params)
 
-    def inherit_friend(self, id_: str, user_info: UserInfo, memo: str, history: str) -> ChatISessionInfo:
+    def inherit_friend(self, id_: str, type_: str, user_info: UserInfo, memo: str, history: str) -> ChatISessionInfo:
         params = asdict(user_info)
-        return self.inherit(id_, "qq-friend", params, memo, history)
+        return self.inherit(id_, type_, params, memo, history)
 
-    def create_group(self, id_: str, group_info: GroupInfo) -> ChatISessionInfo:
+    def create_group(self, id_: str, type_: str, group_info: GroupInfo) -> ChatISessionInfo:
         params = asdict(group_info)
-        return self.create(id_, "qq-group", params)
+        return self.create(id_, type_, params)
 
-    def inherit_group(self, id_: str, group_info: GroupInfo, memo: str, history: str) -> ChatISessionInfo:
+    def inherit_group(self, id_: str, type_: str, group_info: GroupInfo, memo: str, history: str) -> ChatISessionInfo:
         params = asdict(group_info)
-        return self.inherit(id_, "qq-group", params, memo, history)
+        return self.inherit(id_, type_, params, memo, history)

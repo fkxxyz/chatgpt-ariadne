@@ -44,7 +44,8 @@ async def on_session_friend_create(app: Ariadne, user_id: int, comment: str, sou
         add_source=source,  # 加好友时的来源
         add_comment=comment,  # 加好友时的附加消息
     )
-    resp = await utils.chati.create_session_friend_chati(session_id, user_info)
+    type_ = instance.config.accounts_map[app.account].friend_type
+    resp = await utils.chati.create_session_friend_chati(session_id, type_, user_info)
 
     # 发送 chati 的回复给好友
     try:
@@ -88,7 +89,8 @@ async def on_session_friend_inherit(app: Ariadne, user_id: int, memo: str, histo
         add_source="",  # 加好友时的来源
         add_comment="",  # 加好友时的附加消息
     )
-    await utils.chati.inherit_session_friend_chati(session_id, user_info, memo, history)
+    type_ = instance.config.accounts_map[app.account].friend_type
+    await utils.chati.inherit_session_friend_chati(session_id, type_, user_info, memo, history)
 
 
 async def on_session_friend_send(app: Ariadne, user_id: int, msg: str) -> str:
@@ -103,7 +105,8 @@ async def on_session_friend_send(app: Ariadne, user_id: int, msg: str) -> str:
 
     # 发送 chati 的回复给好友
     message = [Plain(resp)]
-    message = await instance.middlewares.execute(message)
+    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message = await instance.middlewares.execute(message, exclude_set)
     try:
         await utils.message.send_friend_message(app, friend, MessageChain(message))
     except Exception as err:

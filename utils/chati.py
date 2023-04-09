@@ -12,30 +12,30 @@ def send_to_chati(msg: str, session_id: str) -> str:
 
 
 @io_bound
-def create_session_friend_chati(session_id: str, user_info: UserInfo) -> str:
-    instance.chati.create_friend(session_id, user_info)
+def create_session_friend_chati(session_id: str, type_: str, user_info: UserInfo) -> str:
+    instance.chati.create_friend(session_id, type_, user_info)
     resp = instance.chati.get_until_end(session_id)
     return resp.msg
 
 
 @io_bound
-def create_session_group_chati(session_id: str, group_info: GroupInfo) -> str:
-    instance.chati.create_group(session_id, group_info)
+def create_session_group_chati(session_id: str, type_: str, group_info: GroupInfo) -> str:
+    instance.chati.create_group(session_id, type_, group_info)
     resp = instance.chati.get_until_end(session_id)
     return resp.msg
 
 
 @io_bound
-def inherit_session_friend_chati(session_id: str, user_info: UserInfo, memo: str,
+def inherit_session_friend_chati(session_id: str, type_: str, user_info: UserInfo, memo: str,
                                  history: str) -> str:
-    instance.chati.inherit_friend(session_id, user_info, memo, history)
+    instance.chati.inherit_friend(session_id, type_, user_info, memo, history)
     resp = instance.chati.get_until_end(session_id)
     return resp.msg
 
 
 @io_bound
-def inherit_session_group_chati(session_id: str, group_info: GroupInfo, memo: str,
+def inherit_session_group_chati(session_id: str, type_: str, group_info: GroupInfo, memo: str,
                                 history: str) -> str:
-    instance.chati.inherit_group(session_id, group_info, memo, history)
+    instance.chati.inherit_group(session_id, type_, group_info, memo, history)
     resp = instance.chati.get_until_end(session_id)
     return resp.msg

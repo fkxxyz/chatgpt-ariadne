@@ -42,7 +42,8 @@ async def on_session_group_create(app: Ariadne, group_id: int) -> str:
         ai_sex=profile.sex,  # AI性别
         welcome_prompt="",
     )
-    resp = await utils.chati.create_session_group_chati(session_id, group_info)
+    type_ = instance.config.accounts_map[app.account].group_type
+    resp = await utils.chati.create_session_group_chati(session_id, type_, group_info)
 
     # 发送 chati 的回复给群组
     try:
@@ -84,7 +85,8 @@ async def on_session_group_inherit(app: Ariadne, group_id: int, memo: str, histo
         ai_sex=profile.sex,  # AI性别
         welcome_prompt="",
     )
-    await utils.chati.inherit_session_group_chati(session_id, group_info, memo, history)
+    type_ = instance.config.accounts_map[app.account].group_type
+    await utils.chati.inherit_session_group_chati(session_id, type_, group_info, memo, history)
 
 
 async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
@@ -99,7 +101,8 @@ async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
 
     # 发送 chati 的回复给群组
     message = [Plain(' ' + resp)]
-    message = await instance.middlewares.execute(message)
+    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message = await instance.middlewares.execute(message, exclude_set)
     try:
         await utils.message.send_group_message(app, group, MessageChain(message))
     except Exception as err:
