@@ -24,7 +24,8 @@ class Text2ImageMiddleware(MessageMiddleware):
         for i in range(len(message)):
             if isinstance(message[i], Plain):
                 text = str(message[i])
-                if len(text) >= 192:
+                replaced, _ = instance.sensitive.filter_1(text)
+                if replaced or (len(text) >= 192 and '```' not in text):
                     image_data = await text2image(text)
                     message[i] = Image(data_bytes=image_data)
         return message
