@@ -10,7 +10,7 @@ from app import instance
 
 
 async def send_to_master(app: Ariadne, msg: str | MessageChain):
-    for master in instance.config.accounts[app.account].masters:
+    for master in instance.config.accounts_map[app.account].masters:
         try:
             friend = await app.get_friend(master, assertion=True, cache=True)
         except ValueError:
