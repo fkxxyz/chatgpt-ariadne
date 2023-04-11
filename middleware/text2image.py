@@ -16,18 +16,27 @@ from markdown.extensions.tables import TableExtension
 from mdx_math import MathExtension
 
 from app import instance
-from middleware import MessageMiddleware
+from middleware import MessageMiddleware, MessageMiddlewareArguments
 
 
 class Text2ImageMiddleware(MessageMiddleware):
-    async def do(self, message: List[Element]) -> List[Element]:
+    async def do(self, message: List[Element], args: MessageMiddlewareArguments) -> List[Element]:
         for i in range(len(message)):
             if isinstance(message[i], Plain):
                 text = str(message[i])
-                replaced, _ = instance.sensitive.filter_1(text)
-                if replaced or (len(text) >= 192 and '```' not in text):
+                image_converted = False
+                if args.force_image:
+                    image_converted = True
+                else:
+                    replaced, _ = instance.sensitive.filter_1(text)
+                    if replaced:
+                        image_converted = True
+                    elif len(text) >= 192 and '```' not in text:
+                        image_converted = True
+                if image_converted:
                     image_data = await text2image(text)
                     message[i] = Image(data_bytes=image_data)
+                    args.image_converted = True
         return message
 
 

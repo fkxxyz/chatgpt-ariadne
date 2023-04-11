@@ -3,7 +3,7 @@ from typing import List, Callable
 
 from graia.ariadne.message.element import Plain, Element
 
-from middleware import MessageMiddleware
+from middleware import MessageMiddleware, MessageMiddlewareArguments
 
 
 class Latex2Text:
@@ -21,7 +21,7 @@ class Latex2TextMiddleware(MessageMiddleware):
     def __init__(self):
         self.replace: Callable[[str], str] = Latex2Text().replace
 
-    async def do(self, message: List[Element]) -> List[Element]:
+    async def do(self, message: List[Element], args: MessageMiddlewareArguments) -> List[Element]:
         for i in range(len(message)):
             if isinstance(message[i], Plain):
                 text = str(message[i])

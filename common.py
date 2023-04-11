@@ -4,6 +4,7 @@ from graia.amnesia.message import MessageChain
 
 import middleware.index
 from middleware import MessageMiddleware
+from middleware.common import MessageMiddlewareArguments
 
 
 def friend_chati_session_id(self_id: int, supplicant: int) -> str:
@@ -21,9 +22,12 @@ class MiddleWaresExecutor:
             m = middleware.index.middlewares[middleware_name]()
             self.middlewares_map[middleware_name] = m
 
-    async def execute(self, message: MessageChain, exclude_set: Set[str]) -> MessageChain:
+    async def execute(self, message: MessageChain, exclude_set: Set[str],
+                      args: MessageMiddlewareArguments = None) -> MessageChain:
+        if args is None:
+            args = MessageMiddlewareArguments()
         for middleware_name in middleware.index.default_middlewares:
             if middleware_name in exclude_set:
                 continue
-            message = await self.middlewares_map[middleware_name].do(message)
+            message = await self.middlewares_map[middleware_name].do(message, args)
         return message

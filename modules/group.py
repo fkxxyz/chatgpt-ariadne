@@ -15,6 +15,7 @@ import utils.chati
 from app import instance
 from chati.chati import GroupInfo
 from common import group_chati_session_id
+from middleware import MessageMiddlewareArguments
 
 channel = Channel.current()
 
@@ -167,11 +168,29 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         return
     finally:
         busy_group.remove(session_id)
-    message = [At(event.sender), Plain(' ' + reply)]
     exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message = [At(event.sender), Plain(' ' + reply)]
     message = await instance.middlewares.execute(message, exclude_set)
     try:
-        await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
+        active_message = await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
     except Exception as err:
         await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
+        return
+
+    if active_message.id <= 0:
+        await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.id}），准备转换成图片重试")
+
+        message = [At(event.sender), Plain(' ' + reply)]
+        message = await instance.middlewares.execute(message, exclude_set, MessageMiddlewareArguments(
+            force_image=True,
+        ))
+        await utils.message.send_to_master(app, MessageChain(message))
+        try:
+            active_message = await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
+        except Exception as err:
+            await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
+            return
+        if active_message.id <= 0:
+            await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.id}），并且已转换成图片，已放弃")
+            return
         return

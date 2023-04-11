@@ -16,6 +16,7 @@ import utils.chati
 from app import instance
 from chati.chati import UserInfo
 from common import friend_chati_session_id
+from middleware import MessageMiddlewareArguments
 
 channel = Channel.current()
 
@@ -104,11 +105,29 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
         return
     finally:
         busy_friend.remove(session_id)
-    message = [Plain(reply)]
     exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message = [Plain(reply)]
     message = await instance.middlewares.execute(message, exclude_set)
     try:
-        await utils.message.send_friend_message(app, event.sender, MessageChain(message))
+        active_message = await utils.message.send_friend_message(app, event.sender, MessageChain(message))
     except Exception as err:
         await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
+        return
+
+    if active_message.id <= 0:
+        await utils.message.send_to_master(app, f"发送好友消息无效（{event.sender.id}），准备转换成图片重试")
+
+        message = [Plain(reply)]
+        message = await instance.middlewares.execute(message, exclude_set, MessageMiddlewareArguments(
+            force_image=True,
+        ))
+        await utils.message.send_to_master(app, MessageChain(message))
+        try:
+            active_message = await utils.message.send_friend_message(app, event.sender, MessageChain(message))
+        except Exception as err:
+            await utils.message.send_to_master(app, f"发送好友消息失败（{event.sender.id}），已放弃: {str(err)}")
+            return
+        if active_message.id <= 0:
+            await utils.message.send_to_master(app, f"发送好友消息无效（{event.sender.id}），并且已转换成图片，已放弃")
+            return
         return
