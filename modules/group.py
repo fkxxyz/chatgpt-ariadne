@@ -14,7 +14,7 @@ import utils.message
 import utils.chati
 from app import instance
 from chati.chati import GroupInfo
-from common import group_chati_session_id
+from common import group_chati_session_id, group_member_chati_session_id
 from middleware import MessageMiddlewareArguments
 
 channel = Channel.current()
@@ -132,18 +132,29 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     if not msg.startswith("gpt "):
         if not At(app.account) in event.message_chain:
             return
+
         msg = event.message_chain.exclude(At).display
+        session_id = group_member_chati_session_id(app.account, event.sender.group.id, event.sender.id)
+        try:
+            instance.chati.info(session_id)
+        except requests.HTTPError as e:
+            group_session_id = group_chati_session_id(app.account, event.sender.group.id)
+            try:
+                session_info = instance.chati.info(group_session_id)
+            except requests.HTTPError as e:
+                return
+            group_info = GroupInfo(**session_info["params"])
+            type_ = instance.config.accounts_map[app.account].group_type
+            await utils.chati.create_session_group_chati(session_id, type_, group_info)
     else:
         msg = msg[4:]
+        session_id = group_chati_session_id(app.account, event.sender.group.id)
+        try:
+            instance.chati.info(session_id)
+        except requests.HTTPError as e:
+            return
     if len(msg) == 0:
         msg = " "
-
-    session_id = group_chati_session_id(app.account, event.sender.group.id)
-
-    try:
-        instance.chati.info(session_id)
-    except requests.HTTPError as e:
-        return
 
     if session_id in busy_group:
         await utils.message.send_group_message(app, event.sender.group,

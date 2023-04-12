@@ -15,6 +15,10 @@ def group_chati_session_id(self_id: int, supplicant: int) -> str:
     return f"qq-group-{self_id}-{supplicant}"
 
 
+def group_member_chati_session_id(self_id: int, supplicant: int, member: int) -> str:
+    return f"qq-group-member-{self_id}-{supplicant}-{member}"
+
+
 class MiddleWaresExecutor:
     def __init__(self):
         self.middlewares_map: Dict[str, MessageMiddleware] = {}
