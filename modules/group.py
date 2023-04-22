@@ -1,3 +1,4 @@
+import asyncio
 import http
 
 import requests
@@ -162,8 +163,21 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         return
 
     busy_group.add(session_id)
+
     try:
-        reply = await utils.chati.send_to_chati(msg, session_id)
+        chati_task = asyncio.ensure_future(utils.chati.send_to_chati(msg, session_id))
+        try:
+            reply = await asyncio.wait_for(asyncio.shield(chati_task), timeout=30)
+        except asyncio.TimeoutError:
+            await utils.message.send_group_message(
+                app, event.sender.group,
+                MessageChain([At(event.sender), Plain(" 非常抱歉，长时间没有回应，我的服务器可能出了点问题，请稍等...")])
+            )
+            await utils.message.send_to_master(app, f"发送群组消息（{event.sender.group.id}）给 AI 超时")
+
+            # 继续等待
+            await chati_task
+            reply = chati_task.result()
     except requests.HTTPError as e:
         if e.response.status_code == http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
             await utils.message.send_group_message(
@@ -175,7 +189,17 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
             await utils.message.send_to_master(app, err_str)
             err_str = f'抱歉，我服务器似乎出了点问题： 响应返回错误 {e.response.status_code}： {e.response.content.decode()}'
             await utils.message.send_group_message(
-                app, event.sender.group, MessageChain([At(event.sender), Plain(err_str)]))
+                app, event.sender.group, MessageChain([At(event.sender), Plain(' ' + err_str)]))
+        return
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+
+        err_str = f"发送群组消息（{event.sender.id}）给 AI 失败： {str(e)}"
+        await utils.message.send_to_master(app, err_str)
+        err_str = f'抱歉，我服务器似乎出了点问题： {str(e)}'
+        await utils.message.send_group_message(
+            app, event.sender.group, MessageChain([At(event.sender), Plain(' ' + err_str)]))
         return
     finally:
         busy_group.remove(session_id)
