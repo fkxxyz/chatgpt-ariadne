@@ -27,7 +27,7 @@ async def on_session_group_create(app: Ariadne, group_id: int) -> str:
     # 删除 chati 会话
     session_id = group_chati_session_id(app.account, group_id)
     try:
-        instance.chati.delete(session_id)
+        await utils.chati.delete(session_id)
     except requests.HTTPError:
         pass
 
@@ -70,7 +70,7 @@ async def on_session_group_inherit(app: Ariadne, group_id: int, memo: str, histo
     # 删除 chati 会话
     session_id = group_chati_session_id(app.account, group_id)
     try:
-        instance.chati.delete(session_id)
+        await utils.chati.delete(session_id)
     except requests.HTTPError:
         pass
 

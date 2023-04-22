@@ -27,7 +27,7 @@ async def on_session_friend_create(app: Ariadne, user_id: int, comment: str, sou
     # 删除 chati 会话
     session_id = friend_chati_session_id(app.account, user_id)
     try:
-        instance.chati.delete(session_id)
+        await utils.chati.delete(session_id)
     except requests.HTTPError:
         pass
 
@@ -72,7 +72,7 @@ async def on_session_friend_inherit(app: Ariadne, user_id: int, memo: str, histo
     # 删除 chati 会话
     session_id = friend_chati_session_id(app.account, user_id)
     try:
-        instance.chati.delete(session_id)
+        await utils.chati.delete(session_id)
     except requests.HTTPError:
         pass
 

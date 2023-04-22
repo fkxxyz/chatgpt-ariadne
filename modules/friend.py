@@ -47,7 +47,7 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
         add_comment=event.message,  # 加好友时的附加消息
     )
     try:
-        instance.chati.delete(session_id)
+        await utils.chati.delete(session_id)
     except requests.HTTPError as e:
         pass
     try:

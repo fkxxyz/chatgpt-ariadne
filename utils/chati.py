@@ -12,6 +12,21 @@ def send_to_chati(msg: str, session_id: str) -> str:
 
 
 @io_bound
+def send_once(msg: str) -> str:
+    return instance.chati.send_once(msg)
+
+
+@io_bound
+def info(id_: str) -> dict:
+    return instance.chati.info(id_)
+
+
+@io_bound
+def delete(id_: str):
+    return instance.chati.delete(id_)
+
+
+@io_bound
 def create_session_friend_chati(session_id: str, type_: str, user_info: UserInfo) -> str:
     instance.chati.create_friend(session_id, type_, user_info)
     resp = instance.chati.get_until_end(session_id)

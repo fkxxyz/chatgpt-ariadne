@@ -61,7 +61,7 @@ async def group_add_listener(app: Ariadne, event: BotJoinGroupEvent):
         welcome_prompt="",
     )
     try:
-        instance.chati.delete(session_id)
+        await utils.chati.delete(session_id)
     except requests.HTTPError as e:
         pass
     try:
@@ -102,14 +102,14 @@ def generate_welcome_prompt(group_info: GroupInfo, member: Member, profile: Prof
 async def group_member_join_listener(app: Ariadne, event: MemberJoinEvent):
     session_id = group_chati_session_id(app.account, event.member.group.id)
     try:
-        session_info = instance.chati.info(session_id)
+        session_info = await utils.chati.info(session_id)
     except requests.HTTPError as e:
         return
     group_info = GroupInfo(**session_info["params"])
     profile = await app.get_member_profile(event.member)
     welcome_prompt = generate_welcome_prompt(group_info, event.member, profile)
     try:
-        reply = instance.chati.send_once(welcome_prompt)
+        reply = await utils.chati.send_once(welcome_prompt)
     except requests.HTTPError as e:
         await utils.message.send_to_master(app, f"发送欢迎新人提示消息（{event.member.group.id}）给 AI 失败： {str(e)}")
         return
@@ -136,11 +136,11 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         msg = event.message_chain.exclude(At).display
         session_id = group_member_chati_session_id(app.account, event.sender.group.id, event.sender.id)
         try:
-            instance.chati.info(session_id)
+            await utils.chati.info(session_id)
         except requests.HTTPError as e:
             group_session_id = group_chati_session_id(app.account, event.sender.group.id)
             try:
-                session_info = instance.chati.info(group_session_id)
+                session_info = await utils.chati.info(group_session_id)
             except requests.HTTPError as e:
                 return
             group_info = GroupInfo(**session_info["params"])
@@ -150,7 +150,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         msg = msg[4:]
         session_id = group_chati_session_id(app.account, event.sender.group.id)
         try:
-            instance.chati.info(session_id)
+            await utils.chati.info(session_id)
         except requests.HTTPError as e:
             return
     if len(msg) == 0:
