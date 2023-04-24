@@ -31,7 +31,9 @@ class Text2ImageMiddleware(MessageMiddleware):
                     replaced, _ = instance.sensitive.filter_1(text)
                     if replaced:
                         image_converted = True
-                    elif len(text) >= 192 and '```' not in text:
+                    elif len(text) >= 128 and '```' not in text:
+                        image_converted = True
+                    elif len(text) >= 256:
                         image_converted = True
                 if image_converted:
                     image_data = await text2image(text)

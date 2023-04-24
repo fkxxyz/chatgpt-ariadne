@@ -167,13 +167,13 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     try:
         chati_task = asyncio.ensure_future(utils.chati.send_to_chati(msg, session_id))
         try:
-            reply = await asyncio.wait_for(asyncio.shield(chati_task), timeout=30)
+            reply = await asyncio.wait_for(asyncio.shield(chati_task), timeout=120)
         except asyncio.TimeoutError:
             await utils.message.send_group_message(
                 app, event.sender.group,
                 MessageChain([At(event.sender), Plain(" 非常抱歉，长时间没有回应，我的服务器可能出了点问题，请稍等...")])
             )
-            await utils.message.send_to_master(app, f"发送群组消息（{event.sender.group.id}）给 AI 超时")
+            await utils.message.send_to_master(app, f"发送群组消息（{event.sender.group.name}）给 AI 超时")
 
             # 继续等待
             await chati_task
@@ -185,7 +185,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
                 MessageChain([At(event.sender), Plain(f' 抱歉，消息太长啦，我无法接收')])
             )
         else:
-            err_str = f"发送群组消息（{event.sender.id}）给 AI 失败： {str(e)} - {e.response.content.decode()}"
+            err_str = f"发送群组消息（{event.sender.group.name}）给 AI 失败： {str(e)} - {e.response.content.decode()}"
             await utils.message.send_to_master(app, err_str)
             err_str = f'抱歉，我服务器似乎出了点问题： 响应返回错误 {e.response.status_code}： {e.response.content.decode()}'
             await utils.message.send_group_message(
@@ -195,7 +195,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         import traceback
         traceback.print_exc()
 
-        err_str = f"发送群组消息（{event.sender.id}）给 AI 失败： {str(e)}"
+        err_str = f"发送群组消息（{event.sender.group.name}）给 AI 失败： {str(e)}"
         await utils.message.send_to_master(app, err_str)
         err_str = f'抱歉，我服务器似乎出了点问题： {str(e)}'
         await utils.message.send_group_message(
@@ -209,11 +209,11 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     try:
         active_message = await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
     except Exception as err:
-        await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
+        await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.name}），已放弃: {str(err)}")
         return
 
     if active_message.id <= 0:
-        await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.id}），准备转换成图片重试")
+        await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.name}），准备转换成图片重试")
 
         message = [At(event.sender), Plain(' ' + reply)]
         message = await instance.middlewares.execute(message, exclude_set, MessageMiddlewareArguments(
@@ -223,9 +223,9 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         try:
             active_message = await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
         except Exception as err:
-            await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.id}），已放弃: {str(err)}")
+            await utils.message.send_to_master(app, f"发送群组消息失败（{event.sender.group.name}），已放弃: {str(err)}")
             return
         if active_message.id <= 0:
-            await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.id}），并且已转换成图片，已放弃")
+            await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.name}），并且已转换成图片，已放弃")
             return
         return
