@@ -30,7 +30,6 @@ async def new_friend_request_listener(app: Ariadne, event: NewFriendRequestEvent
     master_cor = utils.message.send_to_master(
         app,
         f"我收到好友申请\n"
-        f"QQ： {event.supplicant}\n"
         f"昵称： {event.nickname}\n"
         f"附加消息： {event.message}"
     )
