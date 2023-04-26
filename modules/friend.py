@@ -86,6 +86,11 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
 
     session_id = friend_chati_session_id(app.account, event.sender.id)
 
+    try:
+        session_info = await utils.chati.info(session_id)
+    except requests.HTTPError as e:
+        return
+
     if session_id in busy_friend:
         await utils.message.send_friend_message(app, event.sender, MessageChain([Plain("我还在思考中，请稍等...")]))
         return
