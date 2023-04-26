@@ -61,7 +61,7 @@ def text2qrcode(text: str) -> bytes:
         url = "上传失败：" + str(e)
     image = qrcode.make(url)
     buffered = BytesIO()
-    image.save(buffered, format="JPEG")
+    image.save(buffered, format="PNG")
     return buffered.getvalue()
 
 
