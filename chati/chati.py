@@ -80,13 +80,14 @@ class ChatI:
     def create(self, id_: str, type_: str, params: dict) -> ChatISessionInfo:
         data = params
         params = {'id': id_, 'type': type_}
-        content = call_until_success(lambda: self.__session.put(f"{self.__url}/api/create", params=params, json=data))
+        content = call_until_success(
+            lambda: self.__session.put(f"{self.__url}/api/session/create", params=params, json=data))
         content_dict = json.loads(content)
         return ChatISessionInfo(**content_dict)
 
     def info(self, id_: str):
         params = {'id': id_}
-        content = call_until_success(lambda: self.__session.get(f"{self.__url}/api/info", params=params))
+        content = call_until_success(lambda: self.__session.get(f"{self.__url}/api/session/info", params=params))
         content_dict = json.loads(content)
         return content_dict
 
@@ -97,33 +98,36 @@ class ChatI:
             'memo': memo,
             'history': history
         }
-        content = call_until_success(lambda: self.__session.put(f"{self.__url}/api/inherit", params=params_, json=data))
+        content = call_until_success(
+            lambda: self.__session.put(f"{self.__url}/api/session/inherit", params=params_, json=data))
         content_dict = json.loads(content)
         return ChatISessionInfo(**content_dict)
 
     def delete(self, id_: str):
         params = {'id': id_}
-        call_until_success(lambda: self.__session.delete(f"{self.__url}/api/delete", params=params))
+        call_until_success(lambda: self.__session.delete(f"{self.__url}/api/session/delete", params=params))
 
     def send(self, msg: str, id_: str):
         data = {'message': msg}
         params = {'id': id_}
-        content = call_until_success(lambda: self.__session.post(f"{self.__url}/api/send", params=params, json=data))
+        content = call_until_success(
+            lambda: self.__session.post(f"{self.__url}/api/session/send", params=params, json=data))
         content_dict = json.loads(content)
         return content_dict
 
     def set_params(self, id_: str, new_params: dict):
         params = {'id': id_}
-        call_until_success(lambda: self.__session.post(f"{self.__url}/api/params", params=params, json=new_params))
+        call_until_success(
+            lambda: self.__session.post(f"{self.__url}/api/session/params", params=params, json=new_params))
 
     def send_once(self, prompt: str) -> str:
         data = {'message': prompt}
-        content = call_until_success(lambda: self.__session.post(f"{self.__url}/api/once", json=data))
+        content = call_until_success(lambda: self.__session.post(f"{self.__url}/api/session/once", json=data))
         return content.decode()
 
     def get(self, id_: str) -> SessionMessageResponse:
         params = {'id': id_}
-        content = call_until_success(lambda: self.__session.get(f"{self.__url}/api/get", params=params))
+        content = call_until_success(lambda: self.__session.get(f"{self.__url}/api/session/get", params=params))
         content_dict = json.loads(content)
         return SessionMessageResponse(**content_dict)
 
