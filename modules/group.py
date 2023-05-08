@@ -148,7 +148,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
             type_ = instance.config.accounts_map[app.account].group_type
             await utils.chati.create_session_group_chati(session_id, type_, group_info)
     else:
-        message_in[0] = Plain(str(message_in)[4:])
+        message_in[0] = Plain(str(message_in[0])[4:])
         session_id = group_chati_session_id(app.account, event.sender.group.id)
         try:
             await utils.chati.info(session_id)
