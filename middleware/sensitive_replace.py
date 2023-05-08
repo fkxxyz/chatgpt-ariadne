@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from graia.ariadne.message.element import Plain, Element
 
@@ -7,6 +7,9 @@ from middleware import MessageMiddleware, MessageMiddlewareArguments
 
 
 class SensitiveReplaceMiddleware(MessageMiddleware):
+    def __init__(self, config: Dict):
+        pass
+
     async def do(self, message: List[Element], args: MessageMiddlewareArguments) -> List[Element]:
         for i in range(len(message)):
             if isinstance(message[i], Plain):

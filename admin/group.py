@@ -102,7 +102,7 @@ async def on_session_group_send(app: Ariadne, group_id: int, msg: str) -> str:
     # 发送 chati 的回复给群组
     message = [Plain(' ' + resp)]
     exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
-    message = await instance.middlewares.execute(message, exclude_set)
+    message = await instance.middlewares.execute_out(message, exclude_set)
     try:
         await utils.message.send_group_message(app, group, MessageChain(message))
     except Exception as err:

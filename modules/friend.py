@@ -96,10 +96,15 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
         await utils.message.send_friend_message(app, event.sender, MessageChain([Plain("我还在思考中，请稍等...")]))
         return
 
+    message_in = list(event.message_chain)
+    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message_in = await instance.middlewares.execute_in(message_in, exclude_set)
+    msg = str(MessageChain(message_in))
+
     busy_friend.add(session_id)
 
     try:
-        chati_task = asyncio.ensure_future(utils.chati.send_to_chati(event.message_chain.display, session_id))
+        chati_task = asyncio.ensure_future(utils.chati.send_to_chati(msg, session_id))
         try:
             reply = await asyncio.wait_for(asyncio.shield(chati_task), timeout=120)
         except asyncio.TimeoutError:
@@ -135,9 +140,8 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
         return
     finally:
         busy_friend.remove(session_id)
-    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
     message = [Plain(reply)]
-    message = await instance.middlewares.execute(message, exclude_set)
+    message = await instance.middlewares.execute_out(message, exclude_set)
     try:
         active_message = await utils.message.send_friend_message(app, event.sender, MessageChain(message))
     except Exception as err:
@@ -148,7 +152,7 @@ async def friend_message_listener(app: Ariadne, event: FriendMessage):
         logger.info(f"{app.account} 发送好友消息无效（{event.sender.nickname} {event.sender.id}），准备转换成图片重试")
 
         message = [Plain(reply)]
-        message = await instance.middlewares.execute(message, exclude_set, MessageMiddlewareArguments(
+        message = await instance.middlewares.execute_out(message, exclude_set, MessageMiddlewareArguments(
             force_image=True,
         ))
         await utils.message.send_to_master(app, MessageChain(message))

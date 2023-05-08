@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 # -*- encoding:utf-8 -*-
 import argparse
-import json
 import pkgutil
 import threading
-from typing import List
 
 from creart import create
 from graia.ariadne.app import Ariadne
@@ -19,9 +17,6 @@ from graia.broadcast import Broadcast
 from graia.saya import Saya
 
 import common
-import middleware.sensitive_replace
-import middleware.latex2text
-import middleware.text2image
 import utils.sensitive
 from admin.index import Admin
 from app import instance
@@ -37,13 +32,15 @@ def main():
 
     # 读取配置文件
     config_ = Config.load(args.config)
+    if config_.middleware is None:
+        config_.middleware = {}
 
     # 初始化全局对象
     chati = ChatI(config_.chati)
     instance.chati = chati
     instance.config = config_
     instance.sensitive = utils.sensitive.SensitiveFilter(config_.sensitive1, config_.sensitive2)
-    instance.middlewares = common.MiddleWaresExecutor()
+    instance.middlewares = common.MiddleWaresExecutor(config_.middleware)
 
     # 初始化 ariadne 对象
     bcc = create(Broadcast)

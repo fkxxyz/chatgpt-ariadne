@@ -130,11 +130,11 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
     if event.sender.id == 2854196310:  # 忽略Q群管家
         return
     msg = event.message_chain.display
+    message_in = list(event.message_chain)
     if not msg.startswith("gpt "):
         if not At(app.account) in event.message_chain:
             return
 
-        msg = event.message_chain.exclude(At).display
         session_id = group_member_chati_session_id(app.account, event.sender.group.id, event.sender.id)
         try:
             await utils.chati.info(session_id)
@@ -148,19 +148,23 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
             type_ = instance.config.accounts_map[app.account].group_type
             await utils.chati.create_session_group_chati(session_id, type_, group_info)
     else:
-        msg = msg[4:]
+        message_in[0] = Plain(str(message_in)[4:])
         session_id = group_chati_session_id(app.account, event.sender.group.id)
         try:
             await utils.chati.info(session_id)
         except requests.HTTPError as e:
             return
-    if len(msg) == 0:
-        msg = " "
 
     if session_id in busy_group:
         await utils.message.send_group_message(app, event.sender.group,
                                                MessageChain([At(event.sender), Plain(" 我还在思考中，请稍等...")]))
         return
+
+    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
+    message_in = await instance.middlewares.execute_in(message_in, exclude_set)
+    msg = str(MessageChain(message_in).exclude(At))
+    if len(msg) == 0:
+        msg = " "
 
     busy_group.add(session_id)
 
@@ -203,9 +207,8 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         return
     finally:
         busy_group.remove(session_id)
-    exclude_set = instance.config.accounts_map[app.account].disabled_middlewares_map
     message = [At(event.sender), Plain(' ' + reply)]
-    message = await instance.middlewares.execute(message, exclude_set)
+    message = await instance.middlewares.execute_out(message, exclude_set)
     try:
         active_message = await utils.message.send_group_message(app, event.sender.group, MessageChain(message))
     except Exception as err:
@@ -216,7 +219,7 @@ async def group_message_listener(app: Ariadne, event: GroupMessage):
         await utils.message.send_to_master(app, f"发送群组消息无效（{event.sender.group.name}），准备转换成图片重试")
 
         message = [At(event.sender), Plain(' ' + reply)]
-        message = await instance.middlewares.execute(message, exclude_set, MessageMiddlewareArguments(
+        message = await instance.middlewares.execute_out(message, exclude_set, MessageMiddlewareArguments(
             force_image=True,
         ))
         await utils.message.send_to_master(app, MessageChain(message))

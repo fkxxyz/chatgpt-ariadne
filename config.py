@@ -33,6 +33,7 @@ class Config:
     port: int
     sensitive1: str
     sensitive2: str
+    middleware: Dict[str, Dict]
 
     @staticmethod
     def load(path_: str):

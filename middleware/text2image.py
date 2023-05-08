@@ -1,7 +1,7 @@
 import base64
 import tempfile
 from io import BytesIO
-from typing import List, Coroutine
+from typing import List, Coroutine, Dict
 
 import PIL.Image
 import imgkit
@@ -20,6 +20,9 @@ from middleware import MessageMiddleware, MessageMiddlewareArguments
 
 
 class Text2ImageMiddleware(MessageMiddleware):
+    def __init__(self, config: Dict):
+        pass
+
     async def do(self, message: List[Element], args: MessageMiddlewareArguments) -> List[Element]:
         for i in range(len(message)):
             if isinstance(message[i], Plain):
