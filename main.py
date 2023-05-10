@@ -17,6 +17,7 @@ from graia.broadcast import Broadcast
 from graia.saya import Saya
 
 import common
+import storage.config
 import utils.sensitive
 from admin.index import Admin
 from app import instance
@@ -38,6 +39,7 @@ def main():
     # 初始化全局对象
     chati = ChatI(config_.chati)
     instance.chati = chati
+    instance.database = storage.config.GlobalConfigDirectory.load(config_.database)
     instance.config = config_
     instance.sensitive = utils.sensitive.SensitiveFilter(config_.sensitive1, config_.sensitive2)
     instance.middlewares = common.MiddleWaresExecutor(config_.middleware)

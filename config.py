@@ -34,6 +34,7 @@ class Config:
     sensitive1: str
     sensitive2: str
     middleware: Dict[str, Dict]
+    database: str
 
     @staticmethod
     def load(path_: str):

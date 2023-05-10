@@ -6,11 +6,13 @@ import common
 import utils.sensitive
 from chati.chati import ChatI
 from config import Config
+from storage.config import GlobalConfigDirectory
 
 
 class Instance:
     def __init__(self):
         self.config: Config | None = None
+        self.database: GlobalConfigDirectory | None = None
         self.chati: ChatI | None = None
         self.app_server: Flask | None = None
         self.admin: Any | None = None
